@@ -1,0 +1,1788 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DIA - Plataforma IA Multi-Sucursal</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --red: #E31E24;
+            --red-dark: #C41E3A;
+            --red-light: #fef2f2;
+            --green: #10b981;
+            --amber: #f59e0b;
+            --blue: #3b82f6;
+            --purple: #8b5cf6;
+            --bg: #f4f4f5;
+            --surface: #ffffff;
+            --border: #e4e4e7;
+            --text: #18181b;
+            --text-2: #71717a;
+            --text-3: #a1a1aa;
+            --mono: 'DM Mono', monospace;
+        }
+        
+        body { 
+            font-family: 'DM Sans', -apple-system, sans-serif;
+            background: var(--bg); 
+            color: var(--text); 
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        
+        /* ── HEADER ── */
+        .header { 
+            background: linear-gradient(135deg, var(--red) 0%, var(--red-dark) 100%); 
+            color: white; 
+            padding: 0.875rem 1.5rem; 
+            box-shadow: 0 2px 12px rgba(227,30,36,0.25);
+            position: sticky; top: 0; z-index: 100;
+        }
+        .header-content { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; }
+        .header h1 { font-size: 1.375rem; font-weight: 700; letter-spacing: 3px; }
+        .header .subtitle { font-size: 0.75rem; opacity: 0.85; margin-top: 0.125rem; letter-spacing: 0.5px; }
+        .store-selector {
+            background: rgba(255,255,255,0.12);
+            border: 1px solid rgba(255,255,255,0.25);
+            color: white; padding: 0.5rem 1rem;
+            border-radius: 0.5rem; font-size: 0.8rem;
+            cursor: pointer; min-width: 210px;
+            font-family: 'DM Sans', sans-serif;
+        }
+        .store-selector option { background: #333; color: white; }
+
+        /* ── LANGUAGE TOGGLE ── */
+        .lang-toggle {
+            display: flex; align-items: center; gap: 0.5rem;
+            background: rgba(255,255,255,0.12);
+            border: 1px solid rgba(255,255,255,0.25);
+            border-radius: 0.5rem; padding: 0.375rem 0.625rem;
+            cursor: pointer; font-size: 0.78rem; font-weight: 600;
+            color: white; user-select: none; white-space: nowrap;
+            font-family: 'DM Sans', sans-serif;
+        }
+        .lang-toggle:hover { background: rgba(255,255,255,0.2); }
+        .lang-switch {
+            display: flex; align-items: center;
+            background: rgba(0,0,0,0.2); border-radius: 1rem;
+            padding: 2px; gap: 2px;
+        }
+        .lang-option {
+            padding: 0.2rem 0.5rem; border-radius: 0.75rem;
+            font-size: 0.72rem; font-weight: 700; transition: all 0.18s;
+            opacity: 0.6;
+        }
+        .lang-option.active { background: white; color: var(--red); opacity: 1; }
+        
+        .container { padding: 1.25rem 1.5rem; max-width: 1400px; margin: 0 auto; }
+        
+        /* ── STORE INFO ── */
+        .store-info {
+            background: white; border-radius: 0.75rem; padding: 1rem 1.25rem;
+            margin-bottom: 1rem; border-left: 4px solid var(--red);
+            box-shadow: 0 1px 6px rgba(0,0,0,0.05);
+            display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;
+        }
+        .store-stats { display: flex; gap: 2rem; flex-wrap: wrap; }
+        .store-stat { text-align: center; }
+        .store-stat-value { font-size: 1.25rem; font-weight: 700; color: var(--red); font-family: var(--mono); }
+        .store-stat-label { font-size: 0.7rem; color: var(--text-2); text-transform: uppercase; letter-spacing: 0.5px; }
+        
+        /* ── NAVIGATION ── */
+        .nav-tabs { 
+            display: flex; gap: 0.375rem; margin-bottom: 1.25rem;
+            overflow-x: auto; padding-bottom: 0.25rem;
+            -webkit-overflow-scrolling: touch;
+        }
+        .nav-tab { 
+            background: white; border: 1px solid var(--border);
+            padding: 0.625rem 1rem; border-radius: 0.5rem;
+            cursor: pointer; font-weight: 500; color: var(--text-2);
+            transition: all 0.18s; white-space: nowrap;
+            display: flex; align-items: center; gap: 0.375rem;
+            font-size: 0.8rem; font-family: 'DM Sans', sans-serif;
+            touch-action: manipulation;
+        }
+        .nav-tab.active { 
+            background: var(--red); color: white;
+            border-color: var(--red);
+            box-shadow: 0 2px 8px rgba(227,30,36,0.3);
+        }
+        .nav-tab.nav-highlight {
+            border-color: var(--red); color: var(--red);
+            background: var(--red-light); font-weight: 600;
+        }
+        
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        
+        /* ── CARDS & GRID ── */
+        .grid { display: grid; gap: 1rem; grid-template-columns: 1fr; }
+        @media(min-width:768px){ .grid.grid-cols-2{ grid-template-columns: repeat(2,1fr); } }
+        @media(min-width:1024px){ .grid.grid-cols-3{ grid-template-columns: repeat(3,1fr); } .grid.grid-cols-4{ grid-template-columns: repeat(4,1fr); } }
+        
+        .card { 
+            background: white; border-radius: 0.75rem;
+            padding: 1.125rem; box-shadow: 0 1px 6px rgba(0,0,0,0.05);
+            border: 1px solid var(--border); transition: all 0.18s;
+        }
+        .card.clickable:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,0.1); cursor: pointer; }
+        .card-title { font-size: 0.875rem; font-weight: 600; margin-bottom: 0.375rem; }
+        .card-subtitle { font-size: 0.8rem; color: var(--text-2); }
+        .metric-large { font-size: 1.75rem; font-weight: 700; line-height: 1.2; font-family: var(--mono); }
+        
+        .section-title { 
+            font-size: 1rem; font-weight: 700; margin-bottom: 0.875rem;
+            border-bottom: 2px solid var(--red); padding-bottom: 0.4rem; color: var(--text);
+            display: flex; align-items: center; gap: 0.5rem;
+        }
+        
+        /* ── TABLES ── */
+        .table-container { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 0.5rem; border: 1px solid var(--border); }
+        table { width: 100%; border-collapse: collapse; font-size: 0.8rem; min-width: 600px; }
+        th, td { padding: 0.7rem 0.875rem; text-align: left; border-bottom: 1px solid var(--border); vertical-align: middle; }
+        th { background: #fafafa; font-weight: 600; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.4px; color: var(--text-2); }
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background: #fafafa; }
+        td .clickable { cursor: pointer; text-decoration: underline; color: var(--blue); font-weight: 500; }
+        
+        /* ── BADGES ── */
+        .badge { 
+            padding: 0.25rem 0.625rem; border-radius: 2rem;
+            font-size: 0.7rem; font-weight: 600;
+            display: inline-block; margin: 0.1rem;
+            letter-spacing: 0.2px;
+        }
+        .badge-danger { background: #fee2e2; color: #991b1b; }
+        .badge-warning { background: #fef3c7; color: #92400e; }
+        .badge-info { background: #dbeafe; color: #1e40af; }
+        .badge-success { background: #dcfce7; color: #166534; }
+        .badge-event { background: #f4f4f5; color: #52525b; }
+        .badge-purple { background: #ede9fe; color: #5b21b6; }
+        
+        /* ── TREND ── */
+        .trend { font-size: 0.8rem; font-weight: 600; margin-left: 0.375rem; }
+        .trend-up { color: var(--green); }
+        .trend-down { color: var(--red); }
+        
+        /* ── BUTTONS ── */
+        .btn { 
+            padding: 0.625rem 1.125rem; border: none; border-radius: 0.5rem;
+            cursor: pointer; font-weight: 600; transition: all 0.18s;
+            font-size: 0.875rem; touch-action: manipulation;
+            font-family: 'DM Sans', sans-serif;
+        }
+        .btn-primary { background: linear-gradient(135deg, var(--red) 0%, var(--red-dark) 100%); color: white; }
+        .btn-primary:hover { box-shadow: 0 4px 12px rgba(227,30,36,0.35); transform: translateY(-1px); }
+        .btn-secondary { background: #f4f4f5; color: var(--text); border: 1px solid var(--border); }
+        .btn-secondary:hover { background: #e4e4e7; }
+        .btn-green { background: linear-gradient(135deg, #10b981, #059669); color: white; }
+        .btn-green:hover { box-shadow: 0 4px 12px rgba(16,185,129,0.35); }
+        .btn-strategy { background: #f4f4f5; color: var(--text); font-size: 0.78rem; padding: 0.375rem 0.75rem; margin: 0.125rem; border-radius: 0.375rem; border: 1px solid var(--border); }
+        .btn-strategy:hover { background: var(--red-light); border-color: var(--red); color: var(--red); }
+
+        /* ── MODALS ── */
+        .modal-overlay { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6); display: none;
+            align-items: flex-end; justify-content: center; z-index: 1000; padding: 0;
+        }
+        .modal-content { 
+            background: white; border-radius: 1rem 1rem 0 0; width: 100%;
+            max-height: 85vh; overflow-y: auto; box-shadow: 0 -4px 24px rgba(0,0,0,0.15);
+            position: relative; animation: slideUp 0.25s ease-out;
+        }
+        @media(min-width:768px){
+            .modal-overlay { align-items: center; padding: 1rem; }
+            .modal-content { border-radius: 1rem; max-width: 680px; width: 95%; animation: fadeIn 0.2s ease-out; }
+        }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+        .modal-close { 
+            position: absolute; top: 1rem; right: 1rem;
+            background: #f4f4f5; border: none; border-radius: 50%;
+            width: 2rem; height: 2rem; font-size: 1rem;
+            cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 10;
+        }
+        .modal-body { padding: 1.75rem; }
+
+        /* ── WEATHER ── */
+        .weather-grid { display: grid; grid-template-columns: repeat(5,1fr); text-align: center; gap: 0.375rem; }
+        .weather-grid .day { font-weight: 600; font-size: 0.7rem; color: var(--text-2); }
+        .weather-grid .weather-icon { font-size: 1.375rem; margin: 0.2rem 0; }
+        .weather-grid .temp { font-size: 0.8rem; font-weight: 600; }
+        
+        /* ── EVENT LIST ── */
+        .event-list { list-style: none; padding: 0; font-size: 0.8rem; }
+        .event-list li { margin-bottom: 0.625rem; padding: 0.5rem 0.625rem; background: #fafafa; border-radius: 0.375rem; border-left: 3px solid var(--border); }
+
+        /* ── FACTORS CONTAINER ── */
+        .factors-container { display: flex; flex-direction: column; gap: 1rem; margin-bottom: 1rem; }
+        @media(min-width:768px){ .factors-container { flex-direction: row; } .factors-container .card { flex: 1; } }
+
+        /* ── CHEF / RECIPE ── */
+        .chef-selection-container { display: flex; flex-direction: column; gap: 1.5rem; }
+        @media(min-width:768px){ .chef-selection-container { flex-direction: row; } }
+        .selection-column.disabled { opacity: 0.4; pointer-events: none; }
+        .selectable-card { cursor: pointer; border: 2px solid var(--border); }
+        .selectable-card:hover { border-color: #fca5a5; }
+        .selectable-card.selected { border-color: var(--red); box-shadow: 0 0 0 3px rgba(227,30,36,0.15); }
+        .recipe-results-grid { display: grid; grid-template-columns: 1fr; gap: 0.75rem; }
+        @media(min-width:768px){ .recipe-results-grid { grid-template-columns: repeat(2,1fr); } }
+        .recipe-item { display: flex; align-items: flex-start; padding: 0.875rem; border: 1px solid var(--border); border-radius: 0.625rem; gap: 0.75rem; }
+        .recipe-item input[type="checkbox"] { margin-top: 0.2rem; transform: scale(1.15); accent-color: var(--red); }
+        .recipe-item-info { flex-grow: 1; cursor: pointer; }
+        .recipe-item-info h4 { font-size: 0.875rem; font-weight: 600; margin-bottom: 0.2rem; }
+        .recipe-item-info p { font-size: 0.78rem; color: var(--text-2); }
+
+        /* ── COMPARISON ── */
+        .comparison-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(280px,1fr)); gap: 1rem; margin-top: 1rem; }
+        .comparison-store { border: 1.5px solid var(--border); border-radius: 0.75rem; padding: 1rem; background: white; }
+        .comparison-store h3 { color: var(--red); margin-bottom: 0.75rem; font-size: 0.95rem; }
+        .comparison-metric { display: flex; justify-content: space-between; align-items: center; padding: 0.3rem 0; border-bottom: 1px solid #f4f4f5; font-size: 0.8rem; }
+        .comparison-metric:last-child { border-bottom: none; }
+
+        /* ═══════════════════════════════════════════
+           ── AI ENGINE SECTION (NEW CORE FEATURE) ──
+           ═══════════════════════════════════════════ */
+
+        /* Step Progress */
+        .ai-pipeline {
+            display: flex; align-items: center; gap: 0; margin-bottom: 1.5rem;
+            background: white; border-radius: 0.75rem; padding: 1.25rem;
+            border: 1px solid var(--border); box-shadow: 0 1px 6px rgba(0,0,0,0.05);
+            overflow-x: auto;
+        }
+        .pipeline-step {
+            display: flex; flex-direction: column; align-items: center;
+            min-width: 130px; text-align: center; position: relative;
+        }
+        .pipeline-step:not(:last-child)::after {
+            content: '→';
+            position: absolute; right: -14px; top: 14px;
+            font-size: 1.25rem; color: var(--text-3); font-weight: 300;
+        }
+        .pipeline-icon {
+            width: 2.5rem; height: 2.5rem; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.1rem; margin-bottom: 0.5rem;
+            background: #f4f4f5; color: var(--text-2);
+            border: 2px solid var(--border);
+            transition: all 0.3s;
+        }
+        .pipeline-step.active .pipeline-icon {
+            background: var(--red); color: white; border-color: var(--red);
+            box-shadow: 0 0 0 4px rgba(227,30,36,0.15);
+        }
+        .pipeline-step.completed .pipeline-icon {
+            background: var(--green); color: white; border-color: var(--green);
+        }
+        .pipeline-label { font-size: 0.72rem; font-weight: 600; color: var(--text-2); line-height: 1.3; }
+        .pipeline-step.active .pipeline-label { color: var(--red); }
+        .pipeline-step.completed .pipeline-label { color: var(--green); }
+
+        /* ML Confidence Bar */
+        .confidence-bar-wrap { background: #f4f4f5; border-radius: 2rem; height: 6px; overflow: hidden; margin: 0.375rem 0; }
+        .confidence-bar { height: 100%; border-radius: 2rem; transition: width 1s ease; }
+
+        /* Overstock Predictor */
+        .overstock-card {
+            border: 1.5px solid var(--border); border-radius: 0.75rem; overflow: hidden;
+            transition: all 0.2s; cursor: pointer;
+        }
+        .overstock-card:hover { border-color: var(--red); box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
+        .overstock-card.selected { border-color: var(--red); box-shadow: 0 0 0 3px rgba(227,30,36,0.12); }
+        .overstock-card-header { padding: 0.875rem; background: #fafafa; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: flex-start; }
+        .overstock-card-body { padding: 0.875rem; }
+        .overstock-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(240px,1fr)); gap: 0.875rem; }
+
+        /* ML Progress Animation */
+        .ml-loading {
+            display: flex; align-items: center; gap: 0.75rem;
+            padding: 0.875rem; background: #fafafa; border-radius: 0.625rem;
+            margin: 0.5rem 0; font-size: 0.8rem; color: var(--text-2);
+        }
+        .spinner { 
+            width: 1rem; height: 1rem; border: 2px solid var(--border);
+            border-top-color: var(--red); border-radius: 50%;
+            animation: spin 0.8s linear infinite; flex-shrink: 0;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .ml-log { font-family: var(--mono); font-size: 0.72rem; color: var(--text-2); padding: 0 0 0 1.75rem; }
+
+        /* Customer Targeting */
+        .customer-target-card {
+            display: flex; align-items: center; gap: 0.875rem;
+            padding: 0.875rem; border: 1.5px solid var(--border); border-radius: 0.625rem;
+            cursor: pointer; transition: all 0.18s;
+        }
+        .customer-target-card:hover { border-color: var(--blue); background: #eff6ff; }
+        .customer-target-card.selected { border-color: var(--blue); background: #eff6ff; box-shadow: 0 0 0 3px rgba(59,130,246,0.12); }
+        .customer-avatar { 
+            width: 2.5rem; height: 2.5rem; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.1rem; flex-shrink: 0;
+        }
+        .customer-match-score { font-family: var(--mono); font-size: 1.25rem; font-weight: 700; }
+
+        /* Discount Strategy */
+        .strategy-option {
+            border: 2px solid var(--border); border-radius: 0.75rem; padding: 1rem;
+            cursor: pointer; transition: all 0.2s; position: relative; overflow: hidden;
+        }
+        .strategy-option:hover { border-color: var(--amber); background: #fffbeb; }
+        .strategy-option.selected { border-color: var(--amber); background: #fffbeb; box-shadow: 0 0 0 3px rgba(245,158,11,0.12); }
+        .strategy-option.best-pick { border-color: var(--green); background: #f0fdf4; }
+        .strategy-option.best-pick.selected { box-shadow: 0 0 0 3px rgba(16,185,129,0.15); }
+        .best-pick-ribbon {
+            position: absolute; top: 0; right: 0;
+            background: var(--green); color: white;
+            font-size: 0.65rem; font-weight: 700; padding: 0.2rem 0.5rem;
+            border-radius: 0 0.75rem 0 0.5rem; letter-spacing: 0.3px;
+        }
+        .strategy-roi { font-family: var(--mono); font-size: 1.5rem; font-weight: 700; }
+        .strategy-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(200px,1fr)); gap: 0.875rem; }
+
+        /* Results Panel */
+        .results-panel {
+            background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+            border: 1.5px solid #86efac; border-radius: 0.875rem; padding: 1.25rem;
+        }
+        .results-panel.danger { background: linear-gradient(135deg, #fff1f2, #fee2e2); border-color: #fca5a5; }
+
+        .kpi-row { display: flex; gap: 1.5rem; flex-wrap: wrap; }
+        .kpi-box { flex: 1; min-width: 120px; }
+        .kpi-box-value { font-size: 1.5rem; font-weight: 700; font-family: var(--mono); }
+        .kpi-box-label { font-size: 0.72rem; color: var(--text-2); text-transform: uppercase; letter-spacing: 0.4px; }
+
+        /* Simulation Chart (pure CSS) */
+        .sim-chart { display: flex; align-items: flex-end; gap: 0.375rem; height: 80px; padding: 0.5rem 0; }
+        .sim-bar { 
+            flex: 1; border-radius: 0.25rem 0.25rem 0 0;
+            display: flex; align-items: flex-end; justify-content: center;
+            padding-bottom: 0.25rem; font-size: 0.65rem; font-weight: 700; color: white;
+            transition: height 0.6s ease; min-width: 24px;
+        }
+        .sim-bar-label { font-size: 0.65rem; text-align: center; color: var(--text-2); margin-top: 0.25rem; }
+
+        /* Sensitivity Mini Chart */
+        .sensitivity-row { display: flex; gap: 0.5rem; margin-bottom: 0.25rem; align-items: center; font-size: 0.78rem; }
+        .sensitivity-bar-wrap { flex: 1; background: #f4f4f5; border-radius: 2rem; height: 8px; overflow: hidden; }
+        .sensitivity-bar { height: 100%; border-radius: 2rem; }
+        .sensitivity-label { width: 70px; color: var(--text-2); }
+        .sensitivity-value { width: 55px; text-align: right; font-family: var(--mono); font-weight: 600; }
+
+        /* Notification dot */
+        .notif-dot {
+            display: inline-block; width: 6px; height: 6px;
+            background: var(--red); border-radius: 50; margin-left: 4px;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%,100%{ opacity:1; transform: scale(1); }
+            50%{ opacity:0.6; transform: scale(0.85); }
+        }
+
+        /* Responsive adjustments */
+        @media(min-width:768px){
+            .container { max-width: 1400px; padding: 1.5rem; }
+            .header { padding: 1rem 1.5rem; }
+        }
+        @media(min-width:1024px){
+            .grid.grid-cols-2{ grid-template-columns: repeat(2,1fr); }
+            .grid.grid-cols-3{ grid-template-columns: repeat(3,1fr); }
+            .grid.grid-cols-4{ grid-template-columns: repeat(4,1fr); }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div>
+                <h1>DIA</h1>
+                <div class="subtitle" data-i18n="subtitle">Plataforma IA Multi-Sucursal · Motor de Optimización Predictiva</div>
+            </div>
+            <div style="display:flex; align-items:center; gap:0.75rem; flex-wrap:wrap;">
+                <button class="lang-toggle" onclick="toggleLanguage()" id="langToggleBtn" title="Switch language">
+                    🌐
+                    <div class="lang-switch">
+                        <span class="lang-option active" id="lang-es">ES</span>
+                        <span class="lang-option" id="lang-en">EN</span>
+                    </div>
+                </button>
+                <select class="store-selector" id="storeSelector" onchange="switchStore()">
+                    <option value="bsas_centro">Buenos Aires Centro</option>
+                    <option value="zona_norte">Zona Norte - San Isidro</option>
+                    <option value="zona_sur">Zona Sur - Quilmes</option>
+                    <option value="cordoba">Córdoba Capital</option>
+                    <option value="mendoza">Mendoza Centro</option>
+                    <option value="mar_del_plata">Mar del Plata</option>
+                </select>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Store Info Bar -->
+        <div class="store-info" id="storeInfo">
+            <div id="storeDetails"></div>
+            <div class="store-stats" id="storeStats"></div>
+        </div>
+        
+        <!-- Navigation -->
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="showTab(event, 'manager-view')" data-i18n="nav_panel">📊 Panel</button>
+            <button class="nav-tab nav-highlight" onclick="showTab(event, 'ai-engine')" data-i18n="nav_ai">🧠 Motor IA <span class="notif-dot"></span></button>
+            <button class="nav-tab" onclick="showTab(event, 'inventory')" data-i18n="nav_stock">📦 Stock</button>
+            <button class="nav-tab" onclick="showTab(event, 'customers')" data-i18n="nav_customers">👥 Clientes</button>
+            <button class="nav-tab" onclick="showTab(event, 'forecast')" data-i18n="nav_forecast">📈 Pronóstico</button>
+            <button class="nav-tab" onclick="showTab(event, 'chef-lidy')" data-i18n="nav_chef">👨‍🍳 Chef IA</button>
+            <button class="nav-tab" onclick="showTab(event, 'insights')" data-i18n="nav_insights">💡 Insights</button>
+            <button class="nav-tab" onclick="showTab(event, 'comparison')" data-i18n="nav_compare">🔍 Comparar</button>
+        </div>
+
+        <!-- ══════════════════════════════════════════
+             PANEL TAB
+        ══════════════════════════════════════════ -->
+        <div id="manager-view" class="tab-content active">
+            <div class="grid grid-cols-2" style="gap: 1.25rem;">
+                <div>
+                    <h2 class="section-title" data-i18n="stock_summary">📦 Resumen de Stock</h2>
+                    <div class="grid grid-cols-2">
+                        <div class="card clickable" onclick="showTab(null,'inventory',true)">
+                            <div class="card-title" data-i18n="perishable_skus">SKUs Perecederos</div>
+                            <div id="manager-perishable-count" class="metric-large"></div>
+                        </div>
+                        <div class="card clickable" onclick="showTab(null,'inventory',true)">
+                            <div class="card-title" data-i18n="at_risk_products">Productos en Riesgo</div>
+                            <div id="manager-at-risk-item-count" class="metric-large" style="color: var(--amber);"></div>
+                        </div>
+                        <div class="card clickable" onclick="showTab(null,'inventory',true)">
+                            <div class="card-title" data-i18n="stock_value">Valor en Stock</div>
+                            <div id="manager-total-stock-value" class="metric-large"></div>
+                        </div>
+                        <div class="card clickable" onclick="showTab(null,'inventory',true)">
+                            <div class="card-title" data-i18n="at_risk_value">Valor en Riesgo</div>
+                            <div id="manager-at-risk-value" class="metric-large" style="color: var(--red);"></div>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <h2 class="section-title" data-i18n="customer_summary">👥 Resumen de Clientes</h2>
+                    <div class="grid grid-cols-2">
+                        <div id="kpi-total-clients" class="card clickable" onclick="showTab(null,'customers',true)"></div>
+                        <div id="kpi-avg-basket" class="card clickable" onclick="showTab(null,'customers',true)"></div>
+                        <div id="kpi-visit-freq" class="card clickable" onclick="showTab(null,'customers',true)"></div>
+                        <div id="kpi-ytd-revenue" class="card clickable" onclick="showTab(null,'customers',true)"></div>
+                    </div>
+                </div>
+            </div>
+            <!-- Quick AI Alert -->
+            <div style="margin-top:1.25rem;">
+                <div class="results-panel danger" id="manager-ai-alert" style="cursor:pointer;" onclick="showTab(null,'ai-engine',true)">
+                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.75rem;">
+                        <div>
+                            <div style="font-weight:700; font-size:1rem; margin-bottom:0.375rem;" data-i18n="ai_alert_title">🧠 Motor IA detectó oportunidades de optimización</div>
+                            <div id="manager-ai-alert-text" style="font-size:0.85rem; color:#7f1d1d;"></div>
+                        </div>
+                        <button class="btn btn-primary" onclick="event.stopPropagation(); showTab(null,'ai-engine',true)" data-i18n="view_ai_analysis">Ver Análisis IA →</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══════════════════════════════════════════
+             🧠 AI ENGINE TAB — CORE NEW FEATURE
+        ══════════════════════════════════════════ -->
+        <div id="ai-engine" class="tab-content">
+
+            <!-- Pipeline Steps -->
+            <div class="ai-pipeline" id="ai-pipeline">
+                <div class="pipeline-step active" id="step-1">
+                    <div class="pipeline-icon">🔮</div>
+                    <div class="pipeline-label" data-i18n="step1_label">Paso 1<br>Predicción<br>de Exceso</div>
+                </div>
+                <div class="pipeline-step" id="step-2">
+                    <div class="pipeline-icon">🎯</div>
+                    <div class="pipeline-label" data-i18n="step2_label">Paso 2<br>Targeting<br>de Clientes</div>
+                </div>
+                <div class="pipeline-step" id="step-3">
+                    <div class="pipeline-icon">💰</div>
+                    <div class="pipeline-label" data-i18n="step3_label">Paso 3<br>Estrategia<br>de Descuento</div>
+                </div>
+                <div class="pipeline-step" id="step-4">
+                    <div class="pipeline-icon">📊</div>
+                    <div class="pipeline-label" data-i18n="step4_label">Paso 4<br>Retorno<br>Cash/Cash</div>
+                </div>
+            </div>
+
+            <!-- ── STEP 1: Overstock Prediction ── -->
+            <div id="ai-step-1-panel">
+                <h2 class="section-title" data-i18n="step1_title">🔮 Paso 1 — Predicción de Exceso de Stock con ML</h2>
+                <div class="card" style="margin-bottom:1rem;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; margin-bottom:1rem;">
+                        <div>
+                            <div class="card-title" data-i18n="ml_engine_title">Motor de Machine Learning — Gradient Boosting + Series de Tiempo</div>
+                            <div class="card-subtitle" data-i18n="ml_engine_desc">El modelo analiza ventas históricas, estacionalidad, clima y eventos locales para predecir probabilidad de exceso en los próximos 7 días</div>
+                        </div>
+                        <button class="btn btn-primary" onclick="runMLPrediction()" data-i18n="run_model">▶ Ejecutar Modelo</button>
+                    </div>
+                    <div id="ml-log-container" style="display:none;">
+                        <div class="ml-loading" id="ml-loading-1"><div class="spinner"></div><div><div>Cargando datos históricos de ventas (24 meses)...</div><div class="ml-log">Loading sales_history.parquet → 847,293 registros</div></div></div>
+                        <div class="ml-loading" id="ml-loading-2" style="display:none;"><div class="spinner"></div><div><div>Entrenando modelo de series de tiempo...</div><div class="ml-log">XGBoost + ARIMA ensemble | RMSE: 0.073 | MAE: 0.051</div></div></div>
+                        <div class="ml-loading" id="ml-loading-3" style="display:none;"><div class="spinner"></div><div><div>Incorporando señales externas (clima, eventos, feriados)...</div><div class="ml-log">Weather API: ✓ | Events DB: ✓ | Holidays: ✓ | Foot traffic: ✓</div></div></div>
+                        <div class="ml-loading" id="ml-loading-4" style="display:none;"><div class="spinner"></div><div><div>Calculando probabilidades de exceso por SKU...</div><div class="ml-log">Scoring <span id="ml-sku-count">0</span> SKUs perecederos...</div></div></div>
+                    </div>
+                </div>
+                <div id="overstock-results" style="display:none;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.875rem; flex-wrap:wrap; gap:0.75rem;">
+                        <h3 style="font-weight:600; font-size:0.875rem; color:var(--text-2); text-transform:uppercase; letter-spacing:0.5px;">SKUs con Alta Probabilidad de Exceso — Seleccioná uno para continuar</h3>
+                        <div style="display:flex; gap:0.5rem; align-items:center;">
+                            <span class="badge badge-danger">🔴 Alto riesgo ≥70%</span>
+                            <span class="badge badge-warning">🟡 Medio 40-69%</span>
+                        </div>
+                    </div>
+                    <div class="overstock-grid" id="overstock-cards"></div>
+                    <div style="margin-top:1rem; text-align:right;">
+                        <button class="btn btn-primary" id="btn-to-step-2" disabled onclick="goToStep(2)">Continuar → Identificar Clientes</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── STEP 2: Customer Targeting ── -->
+            <div id="ai-step-2-panel" style="display:none;">
+                <h2 class="section-title">🎯 Paso 2 — Targeting de Clientes con IA</h2>
+                <div class="card" style="margin-bottom:1rem;">
+                    <div style="display:flex; align-items:center; gap:1rem; flex-wrap:wrap;">
+                        <div style="font-size:2rem;">🛒</div>
+                        <div>
+                            <div class="card-title" id="targeting-product-name">Analizando producto seleccionado...</div>
+                            <div class="card-subtitle">El sistema analiza el historial de compras de cada cliente para calcular su propensión de compra (Propensity Score) usando Collaborative Filtering + RFM scoring</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem; margin-bottom:1rem;">
+                    <div class="card">
+                        <div class="card-title" style="margin-bottom:0.75rem;">📊 Análisis de Comportamiento de Compra</div>
+                        <div id="behavior-analysis"></div>
+                    </div>
+                    <div class="card">
+                        <div class="card-title" style="margin-bottom:0.75rem;">🧬 Segmentos Más Propensos</div>
+                        <div id="propensity-segments"></div>
+                    </div>
+                </div>
+
+                <h3 style="font-weight:600; margin-bottom:0.75rem; font-size:0.875rem; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-2);">Top Clientes Objetivo — Propensity Score ≥ 65%</h3>
+                <div class="grid grid-cols-2" id="target-customers" style="margin-bottom:1rem;"></div>
+
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.75rem; margin-top:1rem;">
+                    <button class="btn btn-secondary" onclick="goToStep(1)">← Volver</button>
+                    <button class="btn btn-primary" onclick="goToStep(3)">Continuar → Diseñar Descuento</button>
+                </div>
+            </div>
+
+            <!-- ── STEP 3: Discount Strategy ── -->
+            <div id="ai-step-3-panel" style="display:none;">
+                <h2 class="section-title">💰 Paso 3 — Optimización de Estrategia de Descuento</h2>
+
+                <div class="card" style="margin-bottom:1rem;">
+                    <div class="card-title" style="margin-bottom:0.375rem;">Parámetros del Análisis</div>
+                    <div class="card-subtitle" id="strategy-context"></div>
+                    <div style="display:grid; grid-template-columns: repeat(auto-fit,minmax(140px,1fr)); gap:1rem; margin-top:1rem;">
+                        <div><div class="card-subtitle">Costo del Producto</div><div id="param-cost" style="font-weight:700; font-family:var(--mono);"></div></div>
+                        <div><div class="card-subtitle">Precio Regular</div><div id="param-price" style="font-weight:700; font-family:var(--mono);"></div></div>
+                        <div><div class="card-subtitle">Unidades en Riesgo</div><div id="param-units" style="font-weight:700; font-family:var(--mono);"></div></div>
+                        <div><div class="card-subtitle">Días hasta Vencimiento</div><div id="param-days" style="font-weight:700; font-family:var(--mono);"></div></div>
+                        <div><div class="card-subtitle">Pérdida si No se Vende</div><div id="param-loss" style="font-weight:700; font-family:var(--mono); color:var(--red);"></div></div>
+                    </div>
+                </div>
+
+                <h3 style="font-weight:600; margin-bottom:0.875rem; font-size:0.875rem; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-2);">Estrategias Evaluadas por Simulación de Monte Carlo (10,000 iteraciones)</h3>
+                <div class="strategy-grid" id="strategy-options" style="margin-bottom:1rem;"></div>
+
+                <!-- Sensitivity Analysis -->
+                <div class="card" style="margin-bottom:1rem;">
+                    <div class="card-title" style="margin-bottom:0.875rem;">🔬 Análisis de Sensibilidad — Impacto de Variables Clave</div>
+                    <div id="sensitivity-analysis"></div>
+                </div>
+
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.75rem;">
+                    <button class="btn btn-secondary" onclick="goToStep(2)">← Volver</button>
+                    <button class="btn btn-green" onclick="goToStep(4)">Ver Retorno Cash/Cash →</button>
+                </div>
+            </div>
+
+            <!-- ── STEP 4: Cash-on-Cash Return ── -->
+            <div id="ai-step-4-panel" style="display:none;">
+                <h2 class="section-title">📊 Paso 4 — Análisis de Retorno Cash/Cash</h2>
+
+                <!-- Hero Result -->
+                <div class="results-panel" id="final-result-panel" style="margin-bottom:1rem;">
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:1rem;">
+                        <div>
+                            <div style="font-size:0.8rem; font-weight:600; text-transform:uppercase; letter-spacing:0.5px; color:#166534; margin-bottom:0.5rem;">✅ Estrategia Óptima Recomendada</div>
+                            <div style="font-size:1.5rem; font-weight:700; margin-bottom:0.25rem;" id="final-strategy-name"></div>
+                            <div id="final-strategy-desc" style="font-size:0.85rem; color:#166534;"></div>
+                        </div>
+                        <div style="text-align:right;">
+                            <div style="font-size:0.75rem; color:#166534; margin-bottom:0.25rem;">Retorno Cash/Cash</div>
+                            <div style="font-size:3rem; font-weight:800; font-family:var(--mono); color:#166534; line-height:1;" id="final-coc-return"></div>
+                        </div>
+                    </div>
+                    <div class="kpi-row" style="margin-top:1.25rem;" id="final-kpis"></div>
+                </div>
+
+                <!-- Comparative Chart -->
+                <div class="card" style="margin-bottom:1rem;">
+                    <div class="card-title" style="margin-bottom:0.875rem;">Comparación de Estrategias — Retorno Cash/Cash</div>
+                    <div id="coc-chart-container"></div>
+                </div>
+
+                <!-- Projection Table -->
+                <div class="card" style="margin-bottom:1rem;">
+                    <div class="card-title" style="margin-bottom:0.875rem;">📅 Proyección de Recuperación por Canal</div>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Canal</th>
+                                    <th style="text-align:center;">Clientes Alcanzados</th>
+                                    <th style="text-align:center;">Tasa Conversión Est.</th>
+                                    <th style="text-align:center;">Unidades Vendidas</th>
+                                    <th style="text-align:center;">Ingresos</th>
+                                    <th style="text-align:center;">ROI Canal</th>
+                                </tr>
+                            </thead>
+                            <tbody id="channel-breakdown"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div style="display:flex; gap:0.75rem; flex-wrap:wrap; margin-top:1rem;">
+                    <button class="btn btn-secondary" onclick="goToStep(3)">← Volver</button>
+                    <button class="btn btn-primary" onclick="launchCampaign()">🚀 Lanzar Campaña Ahora</button>
+                    <button class="btn btn-secondary" onclick="exportReport()">📄 Exportar Informe</button>
+                    <button class="btn btn-secondary" onclick="resetEngine()">🔄 Nuevo Análisis</button>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ══════════════════════════════════════════
+             INVENTORY TAB
+        ══════════════════════════════════════════ -->
+        <div id="inventory" class="tab-content">
+            <h2 class="section-title" data-i18n="inventory_title">📦 Productos en Riesgo de Stock</h2>
+            <div class="card">
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th data-i18n="col_product">Producto</th>
+                                <th style="text-align:center;" data-i18n="col_sku">SKU</th>
+                                <th style="text-align:center;" data-i18n="col_stock">Stock</th>
+                                <th style="text-align:center;" data-i18n="col_at_risk_value">Valor en Riesgo</th>
+                                <th style="text-align:center;" data-i18n="col_expires">Vence en</th>
+                                <th style="text-align:center;" data-i18n="col_action">Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody id="at-risk-item-table-body"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══════════════════════════════════════════
+             CUSTOMERS TAB
+        ══════════════════════════════════════════ -->
+        <div id="customers" class="tab-content">
+            <div class="grid grid-cols-3" id="customer-segment-list"></div>
+        </div>
+
+        <!-- ══════════════════════════════════════════
+             FORECAST TAB
+        ══════════════════════════════════════════ -->
+        <div id="forecast" class="tab-content">
+            <h2 class="section-title" data-i18n="forecast_external">🌍 Factores Externos (próx. 7 días)</h2>
+            <div class="factors-container">
+                <div class="card"><div class="card-title" data-i18n="events_title">📅 Eventos</div><ul id="events-list" class="event-list"></ul></div>
+                <div class="card"><div class="card-title" data-i18n="matches_title">⚽ Partidos</div><ul id="matches-list" class="event-list"></ul></div>
+                <div class="card"><div class="card-title" data-i18n="weather_title">🌦️ Clima</div><div id="weather-forecast" class="weather-grid"></div></div>
+            </div>
+            <h2 class="section-title" data-i18n="demand_forecast">📈 Pronóstico de Demanda</h2>
+            <div class="card">
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th data-i18n="col_product">Producto</th>
+                                <th style="text-align:center;" data-i18n="col_stock">Stock</th>
+                                <th style="text-align:center;" data-i18n="col_expected_demand">Demanda Prevista</th>
+                                <th data-i18n="col_influence">Factores de Influencia</th>
+                                <th style="text-align:center;" data-i18n="col_status">Estado</th>
+                                <th data-i18n="col_recommendation">Recomendación</th>
+                            </tr>
+                        </thead>
+                        <tbody id="forecast-table-body"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══════════════════════════════════════════
+             CHEF IA TAB
+        ══════════════════════════════════════════ -->
+        <div id="chef-lidy" class="tab-content">
+            <div class="card">
+                <div class="chef-selection-container">
+                    <div id="segment-selection-column" class="selection-column">
+                        <h3 class="section-title" data-i18n="chef_step1">Paso 1: Seleccioná el Segmento</h3>
+                        <div id="chef-ia-segments" class="grid"></div>
+                    </div>
+                    <div id="chef-selection-column" class="selection-column disabled">
+                        <h3 class="section-title" data-i18n="chef_step2">Paso 2: Elegí el Chef</h3>
+                        <div id="chef-ia-chef-list" class="grid"></div>
+                    </div>
+                </div>
+                <div id="chef-ia-results-container" style="display:none; margin-top:1.5rem;">
+                    <h3 class="section-title" data-i18n="chef_step3">Paso 3: Seleccioná las Recetas</h3>
+                    <div id="chef-ia-recipes-container" class="recipe-results-grid"></div>
+                    <div id="chef-ia-campaign-buttons" style="margin-top:1rem; text-align:center;">
+                        <button class="btn btn-primary" onclick="createEmailCampaignFromSelected()" data-i18n="create_campaign">Crear Campaña</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══════════════════════════════════════════
+             INSIGHTS TAB
+        ══════════════════════════════════════════ -->
+        <div id="insights" class="tab-content">
+            <div class="card">
+                <div class="card-title" data-i18n="insights_panel_title">Panel de Impacto de la Plataforma</div>
+                <div class="grid grid-cols-4" style="margin-top:1.5rem; text-align:center;">
+                    <div class="card clickable" onclick="handleInsightClick('overstock')">
+                        <div class="card-subtitle" data-i18n="overstock_managed">Valor de Exceso Gestionado (Mes)</div>
+                        <div id="insights-overstock-value" class="metric-large"></div>
+                    </div>
+                    <div class="card clickable" onclick="handleInsightClick('recipe')">
+                        <div class="card-subtitle" data-i18n="recipe_impact">Impacto de Recetas Promovidas</div>
+                        <div id="insights-recipe-impact" class="metric-large" style="color:var(--green);"></div>
+                    </div>
+                    <div class="card clickable" onclick="handleInsightClick('losses')">
+                        <div class="card-subtitle" data-i18n="losses_reduced">Pérdidas Totales Reducidas</div>
+                        <div id="insights-losses-reduced" class="metric-large" style="color:var(--blue);"></div>
+                    </div>
+                    <div class="card clickable" onclick="handleInsightClick('projection')">
+                        <div class="card-subtitle" data-i18n="annual_projection">Proyección Anual de Reducción</div>
+                        <div id="insights-annual-projection" class="metric-large" style="color:var(--red);"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══════════════════════════════════════════
+             COMPARISON TAB
+        ══════════════════════════════════════════ -->
+        <div id="comparison" class="tab-content">
+            <h2 class="section-title" data-i18n="comparison_title">🔍 Comparación Multi-Sucursal</h2>
+            <div class="comparison-grid" id="comparison-grid"></div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <div id="confirmation-modal" class="modal-overlay">
+        <div class="modal-content" style="max-width:480px; text-align:center;">
+            <button class="modal-close">✕</button>
+            <div class="modal-body">
+                <div style="font-size:2.5rem; margin-bottom:0.75rem;" id="confirmation-icon">✅</div>
+                <h2 id="confirmation-title" style="margin-bottom:0.75rem; font-size:1.25rem;"></h2>
+                <p id="confirmation-message" style="font-size:0.9rem; line-height:1.6; color:var(--text-2);"></p>
+                <button id="confirmation-close" class="btn btn-primary" style="margin-top:1.5rem;" data-i18n="close_btn">Cerrar</button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="action-modal" class="modal-overlay">
+        <div class="modal-content" style="max-width:380px;">
+            <button class="modal-close">✕</button>
+            <div class="modal-body">
+                <h3 id="action-modal-title" style="margin-bottom:1rem;"></h3>
+                <div id="action-modal-buttons" style="display:flex; flex-direction:column; gap:0.75rem;"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    // ══════════════════════════════════════════════════════════
+    // DATA & STORE CONFIGS
+    // ══════════════════════════════════════════════════════════
+    let currentStore = 'bsas_centro';
+    let aiState = { step: 1, selectedProduct: null, selectedCustomers: [], selectedStrategy: null };
+    
+    const storeConfigs = {
+        bsas_centro: {
+            name: 'Buenos Aires Centro', address: 'Av. Corrientes 1234, CABA',
+            type: 'Urbano Compacto', size: '450m²', manager: 'María González',
+            employees: 18, demographics: 'Profesionales jóvenes, oficinistas', perishableCount: 85,
+            kpis: {
+                totalClients: { current: 1890, previous: 1756, period: "vs Semana Anterior" },
+                avgBasket: { current: 2450.80, previous: 2285.50, period: "vs Mes Anterior" },
+                visitFreq: { current: 2.3, previous: 2.1, period: "vs Mes Anterior" },
+                ytdRevenue: { current: 18_450_680, previous: 16_890_750, period: "vs Año Anterior" }
+            },
+            factors: ['Hora de almuerzo empresarial', 'Happy hour', 'Congestión vehicular'],
+            customerSegments: [
+                { id: 1, name: 'Ejecutivos en Lunch', clients: 856, status: 'Saludable', tendency: 'up', details: { basket: 3250.80, freq: 2.8}, strategic_suggestions: [{text:'Menú Ejecutivo', action:'recipe'}, {text:'Descuento Corporativo', action:'promotion'}], recommendedChef: 3 },
+                { id: 2, name: 'Oficinistas Quick', clients: 1245, status: 'En Atención', tendency: 'down', details: { basket: 1890.50, freq: 2.1}, strategic_suggestions: [{text:'Combo Express', action:'price'}, {text:'Delivery Flash', action:'promotion'}], recommendedChef: 4 }
+            ],
+            weather: [
+                {day:'Vie', temp:'22°C', condition:'☀️'},{day:'Sáb', temp:'24°C', condition:'☀️'},
+                {day:'Dom', temp:'19°C', condition:'🌦️'},{day:'Lun', temp:'16°C', condition:'🌧️'},
+                {day:'Mar', temp:'20°C', condition:'☁️'}
+            ]
+        },
+        zona_norte: {
+            name: 'Zona Norte - San Isidro', address: 'Av. Libertador 5678, San Isidro',
+            type: 'Hipermercado Familiar', size: '1200m²', manager: 'Carlos Mendez',
+            employees: 45, demographics: 'Familias de clase media-alta, madres', perishableCount: 156,
+            kpis: {
+                totalClients: { current: 3245, previous: 3089, period: "vs Semana Anterior" },
+                avgBasket: { current: 5250.80, previous: 4965.50, period: "vs Mes Anterior" },
+                visitFreq: { current: 1.8, previous: 1.9, period: "vs Mes Anterior" },
+                ytdRevenue: { current: 42_450_680, previous: 38_890_750, period: "vs Año Anterior" }
+            },
+            factors: ['Fin de semana familiar', 'Asados dominicales', 'Eventos escolares'],
+            customerSegments: [
+                { id: 1, name: 'Familias Premium', clients: 1856, status: 'Saludable', tendency: 'up', details: { basket: 7250.80, freq: 1.6}, strategic_suggestions: [{text:'Recetas Gourmet', action:'recipe'}, {text:'Club Premium', action:'promotion'}], recommendedChef: 1 },
+                { id: 2, name: 'Madres Ocupadas', clients: 1389, status: 'Saludable', tendency: 'up', details: { basket: 4180.50, freq: 2.2}, strategic_suggestions: [{text:'Kit Cena Familiar', action:'recipe'}, {text:'Descuento Familiar', action:'price'}], recommendedChef: 2 }
+            ],
+            weather: [
+                {day:'Vie', temp:'20°C', condition:'☀️'},{day:'Sáb', temp:'22°C', condition:'☀️'},
+                {day:'Dom', temp:'18°C', condition:'🌦️'},{day:'Lun', temp:'15°C', condition:'🌧️'},
+                {day:'Mar', temp:'19°C', condition:'☁️'}
+            ]
+        },
+        zona_sur: {
+            name: 'Zona Sur - Quilmes', address: 'Av. Rivadavia 9876, Quilmes',
+            type: 'Supermercado Barrial', size: '680m²', manager: 'Liliana Fernández',
+            employees: 22, demographics: 'Familias trabajadoras, jubilados', perishableCount: 95,
+            kpis: {
+                totalClients: { current: 2845, previous: 2756, period: "vs Semana Anterior" },
+                avgBasket: { current: 1967.70, previous: 1845.20, period: "vs Mes Anterior" },
+                visitFreq: { current: 2.4, previous: 2.2, period: "vs Mes Anterior" },
+                ytdRevenue: { current: 22_450_680, previous: 21_090_750, period: "vs Año Anterior" }
+            },
+            factors: ['Día de cobro', 'Promociones 2x1', 'Transporte público'],
+            customerSegments: [
+                { id: 1, name: 'Familias Ahorrativas', clients: 1845, status: 'Saludable', tendency: 'up', details: { basket: 2250.80, freq: 2.8}, strategic_suggestions: [{text:'Recetas Económicas', action:'recipe'}, {text:'2x1 Básicos', action:'promotion'}], recommendedChef: 2 },
+                { id: 2, name: 'Jubilados', clients: 1000, status: 'En Atención', tendency: 'down', details: { basket: 1480.50, freq: 1.9}, strategic_suggestions: [{text:'Descuento Tercera Edad', action:'price'}, {text:'Porciones Pequeñas', action:'recipe'}], recommendedChef: 2 }
+            ],
+            weather: [
+                {day:'Vie', temp:'18°C', condition:'☀️'},{day:'Sáb', temp:'20°C', condition:'☀️'},
+                {day:'Dom', temp:'16°C', condition:'🌦️'},{day:'Lun', temp:'13°C', condition:'🌧️'},
+                {day:'Mar', temp:'17°C', condition:'☁️'}
+            ]
+        },
+        cordoba: {
+            name: 'Córdoba Capital', address: 'Av. Colón 3456, Nueva Córdoba',
+            type: 'Universitario', size: '580m²', manager: 'Juan Pablo Morales',
+            employees: 25, demographics: 'Estudiantes universitarios, jóvenes profesionales', perishableCount: 78,
+            kpis: {
+                totalClients: { current: 1567, previous: 1234, period: "vs Semana Anterior" },
+                avgBasket: { current: 1450.80, previous: 1325.50, period: "vs Mes Anterior" },
+                visitFreq: { current: 3.1, previous: 2.8, period: "vs Mes Anterior" },
+                ytdRevenue: { current: 15_450_680, previous: 14_090_750, period: "vs Año Anterior" }
+            },
+            factors: ['Período de exámenes', 'Fiestas estudiantiles', 'Inicio de clases'],
+            customerSegments: [
+                { id: 1, name: 'Estudiantes Universitarios', clients: 1156, status: 'Saludable', tendency: 'up', details: { basket: 1250.80, freq: 3.5}, strategic_suggestions: [{text:'Combo Estudiante', action:'price'}, {text:'Recetas Rápidas', action:'recipe'}], recommendedChef: 4 },
+                { id: 2, name: 'Jóvenes Profesionales', clients: 411, status: 'En Atención', tendency: 'up', details: { basket: 2180.50, freq: 2.1}, strategic_suggestions: [{text:'Happy Hour', action:'promotion'}, {text:'Cenas Express', action:'recipe'}], recommendedChef: 3 }
+            ],
+            weather: [
+                {day:'Vie', temp:'25°C', condition:'☀️'},{day:'Sáb', temp:'27°C', condition:'☀️'},
+                {day:'Dom', temp:'23°C', condition:'🌦️'},{day:'Lun', temp:'20°C', condition:'🌧️'},
+                {day:'Mar', temp:'24°C', condition:'☁️'}
+            ]
+        },
+        mendoza: {
+            name: 'Mendoza Centro', address: 'Av. San Martín 7890, Ciudad',
+            type: 'Turístico-Gastronómico', size: '720m²', manager: 'Sofia Ruiz',
+            employees: 28, demographics: 'Turistas, locales gastronómicos, bodegueros', perishableCount: 134,
+            kpis: {
+                totalClients: { current: 1890, previous: 2156, period: "vs Semana Anterior" },
+                avgBasket: { current: 3650.80, previous: 3285.50, period: "vs Mes Anterior" },
+                visitFreq: { current: 1.4, previous: 1.6, period: "vs Mes Anterior" },
+                ytdRevenue: { current: 26_450_680, previous: 24_890_750, period: "vs Año Anterior" }
+            },
+            factors: ['Temporada turística', 'Vendimia', 'Festivales gastronómicos'],
+            customerSegments: [
+                { id: 1, name: 'Turistas Gastronómicos', clients: 756, status: 'Saludable', tendency: 'up', details: { basket: 5250.80, freq: 1.2}, strategic_suggestions: [{text:'Pack Turístico', action:'promotion'}, {text:'Maridajes', action:'recipe'}], recommendedChef: 1 },
+                { id: 2, name: 'Locales Mendocinos', clients: 1134, status: 'En Atención', tendency: 'down', details: { basket: 2680.50, freq: 1.8}, strategic_suggestions: [{text:'Productos Regionales', action:'promotion'}, {text:'Tradición Cuyana', action:'recipe'}], recommendedChef: 2 }
+            ],
+            weather: [
+                {day:'Vie', temp:'28°C', condition:'☀️'},{day:'Sáb', temp:'30°C', condition:'☀️'},
+                {day:'Dom', temp:'26°C', condition:'🌦️'},{day:'Lun', temp:'23°C', condition:'🌧️'},
+                {day:'Mar', temp:'27°C', condition:'☁️'}
+            ]
+        },
+        mar_del_plata: {
+            name: 'Mar del Plata', address: 'Av. Constitución 4567, Centro',
+            type: 'Costero Estacional', size: '890m²', manager: 'Roberto Alvarez',
+            employees: 35, demographics: 'Turistas, veraneantes, locales', perishableCount: 167,
+            kpis: {
+                totalClients: { current: 4567, previous: 3890, period: "vs Semana Anterior" },
+                avgBasket: { current: 2950.80, previous: 2785.50, period: "vs Mes Anterior" },
+                visitFreq: { current: 1.6, previous: 1.8, period: "vs Mes Anterior" },
+                ytdRevenue: { current: 35_450_680, previous: 31_890_750, period: "vs Año Anterior" }
+            },
+            factors: ['Temporada alta', 'Fin de semana largo', 'Clima playero'],
+            customerSegments: [
+                { id: 1, name: 'Veraneantes', clients: 2856, status: 'Saludable', tendency: 'up', details: { basket: 3650.80, freq: 1.3}, strategic_suggestions: [{text:'Pack Playa', action:'promotion'}, {text:'Mariscos Frescos', action:'recipe'}], recommendedChef: 1 },
+                { id: 2, name: 'Familias Marplatenses', clients: 1711, status: 'Saludable', tendency: 'up', details: { basket: 2180.50, freq: 2.2}, strategic_suggestions: [{text:'Tradición Costera', action:'recipe'}, {text:'Descuento Locales', action:'price'}], recommendedChef: 2 }
+            ],
+            weather: [
+                {day:'Vie', temp:'24°C', condition:'☀️'},{day:'Sáb', temp:'26°C', condition:'☀️'},
+                {day:'Dom', temp:'22°C', condition:'🌦️'},{day:'Lun', temp:'19°C', condition:'🌧️'},
+                {day:'Mar', temp:'23°C', condition:'☁️'}
+            ]
+        }
+    };
+
+    const categories = ['Frutas', 'Verduras', 'Carnes', 'Pescados', 'Lácteos', 'Bebidas'];
+    const baseNames = {
+        'Frutas': ['Frutillas', 'Uvas Red Globe', 'Mango', 'Palta', 'Kiwi', 'Banana', 'Manzana Roja', 'Durazno', 'Naranja Valencia', 'Pera'],
+        'Verduras': ['Rúcula', 'Tomate Perita', 'Brócoli', 'Zanahoria', 'Zapallito', 'Lechuga Manteca', 'Morrón Amarillo', 'Cebolla Morada', 'Papa', 'Espinaca'],
+        'Carnes': ['Carne Picada', 'Pechuga de Pollo', 'Bife de Chorizo', 'Chorizo Colorado', 'Costilla de Cerdo', 'Lomo', 'Cuadril', 'Vacío', 'Molleja', 'Panceta'],
+        'Pescados': ['Salmón', 'Merluza', 'Langostinos', 'Calamar', 'Pulpo', 'Sardina', 'Abadejo', 'Mejillones', 'Bacalao', 'Atún Fresco'],
+        'Lácteos': ['Queso Brie', 'Yogur Griego', 'Leche Entera', 'Queso Crema', 'Manteca', 'Queso Cuartirolo', 'Reggianito', 'Cream Cheese', 'Crema de Leche', 'Muzzarella'],
+        'Bebidas': ['Cerveza Artesanal', 'Gaseosa Premium', 'Vino Tinto', 'Agua Saborizada', 'Jugo Natural', 'Vino Blanco', 'Fernet', 'Energizante', 'Té Helado', 'Agua con Gas']
+    };
+
+    const chefs = [
+        { id: 1, name: 'Chef Martín', specialty: 'Cocina Argentina Moderna' },
+        { id: 2, name: 'Chef Lucía', specialty: 'Cocina Familiar Argentina' },
+        { id: 3, name: 'Chef Diego', specialty: 'Cocina Rápida y Saludable' },
+        { id: 4, name: 'Chef Florencia', specialty: 'Cocina Vegana y Sustentable' },
+    ];
+    const fullRecipeBook = {
+        1: [{ name: 'Empanadas de {product}', time: '45 min', difficulty: 'Medio', category: ['Carnes', 'Verduras'] }, { name: 'Ensalada Criolla con {product}', time: '15 min', difficulty: 'Fácil', category: ['Verduras', 'Frutas'] }],
+        2: [{ name: 'Asado de {product}', time: '90 min', difficulty: 'Medio', category: ['Carnes'] }, { name: 'Milanesas de {product}', time: '30 min', difficulty: 'Fácil', category: ['Carnes'] }]
+    };
+
+    let storeDataCache = {};
+    let generatedRecipes = [];
+    let currentStoreData = null;
+
+    // ── AI Engine State ──
+    const discountStrategies = [
+        { id: 'flash10', name: 'Flash 10%', desc: 'Descuento inmediato del 10% en tienda', discount: 0.10, convRate: 0.18, urgency: 'Baja', channel: 'In-store', color: '#3b82f6' },
+        { id: 'loyalty20', name: 'Loyalty 20%', desc: '20% exclusivo para clientes del programa de fidelidad', discount: 0.20, convRate: 0.35, urgency: 'Media', channel: 'App + Email', color: '#8b5cf6' },
+        { id: 'flash30', name: 'Flash 30%', desc: '30% de descuento por tiempo limitado (24hs)', discount: 0.30, convRate: 0.52, urgency: 'Alta', channel: 'Push + Email', color: '#f59e0b' },
+        { id: 'bundle2x1', name: '2x1 Especial', desc: 'Llevate 2 al precio de 1.4', discount: 0.30, convRate: 0.45, urgency: 'Media', channel: 'In-store + Digital', color: '#10b981' },
+        { id: 'chef50', name: 'Receta Chef 40%', desc: '40% descuento ligado a receta de chef IA para el segmento', discount: 0.40, convRate: 0.61, urgency: 'Alta', channel: 'Email + WhatsApp', color: '#E31E24' },
+    ];
+
+    // ══════════════════════════════════════════════════════════
+    // STORE DATA GENERATION
+    // ══════════════════════════════════════════════════════════
+    function generateStoreData(storeId) {
+        if (storeDataCache[storeId]) return storeDataCache[storeId];
+        const config = storeConfigs[storeId];
+        const productCount = config.perishableCount;
+        const products = [];
+        let priceMultiplier = { zona_norte:1.4, mendoza:1.3, mar_del_plata:1.2, cordoba:0.8, zona_sur:0.7, bsas_centro:1.0 }[storeId] || 1.0;
+        
+        for (let i = 0; i < productCount; i++) {
+            const category = categories[Math.floor(i / (productCount/6))];
+            const basePrice = Math.random() * 2000 + 100;
+            const p = {
+                id: i + 1,
+                name: baseNames[category][i % 10] || `${category} Item ${i}`,
+                category,
+                price: parseFloat((basePrice * priceMultiplier).toFixed(2)),
+                cost: parseFloat((basePrice * priceMultiplier * 0.55).toFixed(2)),
+                stock: Math.floor(Math.random() * 150 + 20),
+                expiresInDays: Math.floor(Math.random() * 15 + 1),
+                forecastedDemand: Math.floor(Math.random() * 150 + 20),
+                overstockProb: 0,
+                factors: []
+            };
+            // Overstock probability based on stock vs demand
+            const ratio = p.stock / p.forecastedDemand;
+            p.overstockProb = Math.min(0.95, Math.max(0.1, (ratio - 0.8) * 0.8 + Math.random() * 0.15));
+            if (p.expiresInDays <= 3) p.overstockProb = Math.min(0.95, p.overstockProb + 0.3);
+
+            if (['Bife de Chorizo', 'Chorizo Colorado', 'Cerveza Artesanal'].includes(p.name)) p.factors.push('⚽ Partido local');
+            if (config.factors && Math.random() > 0.7) p.factors.push(config.factors[Math.floor(Math.random()*config.factors.length)]);
+            products.push(p);
+        }
+        const atRiskProducts = products.filter(p => p.expiresInDays <= 4).sort((a,b) => a.expiresInDays - b.expiresInDays);
+        const highOverstock = products.filter(p => p.overstockProb >= 0.4).sort((a,b) => b.overstockProb - a.overstockProb).slice(0, 10);
+        storeDataCache[storeId] = { products, atRiskProducts, highOverstock, config };
+        return storeDataCache[storeId];
+    }
+
+    // ══════════════════════════════════════════════════════════
+    // SWITCH & DISPLAY
+    // ══════════════════════════════════════════════════════════
+    function switchStore() {
+        currentStore = document.getElementById('storeSelector').value;
+        currentStoreData = generateStoreData(currentStore);
+        aiState = { step: 1, selectedProduct: null, selectedCustomers: [], selectedStrategy: null };
+        updateStoreDisplay();
+        renderCurrentTab();
+    }
+
+    function updateStoreDisplay() {
+        const config = currentStoreData.config;
+        document.getElementById('storeDetails').innerHTML = `
+            <h3 style="color:var(--red); margin-bottom:0.375rem; font-size:1rem;">${config.name}</h3>
+            <p style="font-size:0.8rem; color:var(--text-2);"><strong>${config.address}</strong> · ${config.type} · Gte: ${config.manager}</p>
+        `;
+        document.getElementById('storeStats').innerHTML = `
+            <div class="store-stat"><div class="store-stat-value">${config.size}</div><div class="store-stat-label">Superficie</div></div>
+            <div class="store-stat"><div class="store-stat-value">${config.employees}</div><div class="store-stat-label">Empleados</div></div>
+            <div class="store-stat"><div class="store-stat-value">${config.perishableCount}</div><div class="store-stat-label">SKUs Perecederos</div></div>
+            <div class="store-stat"><div class="store-stat-value" style="color:var(--red);">${currentStoreData.atRiskProducts.length}</div><div class="store-stat-label">En Riesgo</div></div>
+        `;
+    }
+
+    function renderCurrentTab() {
+        const activeTab = document.querySelector('.tab-content.active')?.id;
+        if (!activeTab) return;
+        switch(activeTab) {
+            case 'manager-view': renderManagerViewTab(); break;
+            case 'ai-engine': renderAIEngineTab(); break;
+            case 'inventory': renderInventoryTab(); break;
+            case 'customers': renderCustomersTab(); break;
+            case 'forecast': renderForecastTab(); break;
+            case 'chef-lidy': renderChefIATab(); break;
+            case 'insights': renderInsightsTab(); break;
+            case 'comparison': renderComparisonTab(); break;
+        }
+    }
+
+    // ══════════════════════════════════════════════════════════
+    // RENDER: MANAGER VIEW
+    // ══════════════════════════════════════════════════════════
+    function renderManagerViewTab() {
+        if (!currentStoreData) return;
+        const config = currentStoreData.config;
+        const atRiskValue = currentStoreData.atRiskProducts.reduce((s,p) => s + p.stock * p.price, 0);
+        const totalValue = currentStoreData.products.reduce((s,p) => s + p.stock * p.price, 0);
+
+        document.getElementById('manager-perishable-count').textContent = config.perishableCount;
+        document.getElementById('manager-at-risk-item-count').textContent = currentStoreData.atRiskProducts.length;
+        document.getElementById('manager-at-risk-value').textContent = `$${atRiskValue.toLocaleString('es-AR',{maximumFractionDigits:0})}`;
+        document.getElementById('manager-total-stock-value').textContent = `$${totalValue.toLocaleString('es-AR',{maximumFractionDigits:0})}`;
+
+        const kpis = config.kpis;
+        const t = (c,p) => { const ch = ((c-p)/p)*100; return `<span class="trend ${ch>=0?'trend-up':'trend-down'}">${ch>=0?'▲':'▼'} ${Math.abs(ch).toFixed(1)}%</span>`; };
+        document.getElementById('kpi-total-clients').innerHTML = `<div class="card-title">Clientes Activos (STD)</div><div class="metric-large">${kpis.totalClients.current.toLocaleString('es-AR')} ${t(kpis.totalClients.current,kpis.totalClients.previous)}</div><div class="card-subtitle">${kpis.totalClients.period}</div>`;
+        document.getElementById('kpi-avg-basket').innerHTML = `<div class="card-title">Ticket Promedio (MTD)</div><div class="metric-large">$${kpis.avgBasket.current.toFixed(0)} ${t(kpis.avgBasket.current,kpis.avgBasket.previous)}</div><div class="card-subtitle">${kpis.avgBasket.period}</div>`;
+        document.getElementById('kpi-visit-freq').innerHTML = `<div class="card-title">Frecuencia de Visita</div><div class="metric-large">${kpis.visitFreq.current.toFixed(1)}x ${t(kpis.visitFreq.current,kpis.visitFreq.previous)}</div><div class="card-subtitle">${kpis.visitFreq.period}</div>`;
+        document.getElementById('kpi-ytd-revenue').innerHTML = `<div class="card-title">Ventas (YTD)</div><div class="metric-large">$${(kpis.ytdRevenue.current/1000000).toFixed(1)}M ${t(kpis.ytdRevenue.current,kpis.ytdRevenue.previous)}</div><div class="card-subtitle">${kpis.ytdRevenue.period}</div>`;
+
+        const highRiskCount = currentStoreData.highOverstock.filter(p=>p.overstockProb>=0.7).length;
+        document.getElementById('manager-ai-alert-text').textContent = 
+            `${highRiskCount} SKUs con probabilidad de exceso ≥70% · Valor en riesgo: $${atRiskValue.toLocaleString('es-AR',{maximumFractionDigits:0})} · Recuperación potencial con IA: $${(atRiskValue*0.72).toLocaleString('es-AR',{maximumFractionDigits:0})}`;
+    }
+
+    // ══════════════════════════════════════════════════════════
+    // RENDER: AI ENGINE
+    // ══════════════════════════════════════════════════════════
+    function renderAIEngineTab() {
+        updatePipelineUI();
+    }
+
+    function updatePipelineUI() {
+        [1,2,3,4].forEach(i => {
+            const el = document.getElementById(`step-${i}`);
+            el.className = 'pipeline-step';
+            if (i < aiState.step) el.classList.add('completed');
+            if (i === aiState.step) el.classList.add('active');
+        });
+        ['ai-step-1-panel','ai-step-2-panel','ai-step-3-panel','ai-step-4-panel'].forEach((id,idx) => {
+            document.getElementById(id).style.display = (idx+1 === aiState.step) ? 'block' : 'none';
+        });
+    }
+
+    // ── STEP 1: ML Prediction ──
+    function runMLPrediction() {
+        const logContainer = document.getElementById('ml-log-container');
+        logContainer.style.display = 'block';
+        document.getElementById('overstock-results').style.display = 'none';
+
+        const steps = ['ml-loading-1','ml-loading-2','ml-loading-3','ml-loading-4'];
+        let current = 0;
+        document.getElementById(steps[0]).style.display = 'flex';
+
+        const interval = setInterval(() => {
+            current++;
+            if (current < steps.length) {
+                document.getElementById(steps[current]).style.display = 'flex';
+                if (current === 3) {
+                    let count = 0;
+                    const c = storeConfigs[currentStore].perishableCount;
+                    const countInt = setInterval(() => {
+                        count += Math.floor(c/12);
+                        document.getElementById('ml-sku-count').textContent = Math.min(count, c);
+                        if (count >= c) clearInterval(countInt);
+                    }, 80);
+                }
+            } else {
+                clearInterval(interval);
+                setTimeout(showOverstockResults, 600);
+            }
+        }, 900);
+    }
+
+    function showOverstockResults() {
+        document.getElementById('overstock-results').style.display = 'block';
+        const cards = document.getElementById('overstock-cards');
+        const products = currentStoreData.highOverstock;
+        cards.innerHTML = products.map(p => {
+            const prob = Math.round(p.overstockProb * 100);
+            const riskLevel = prob >= 70 ? 'danger' : prob >= 40 ? 'warning' : 'info';
+            const riskLabel = prob >= 70 ? 'Alto Riesgo' : prob >= 40 ? 'Riesgo Medio' : 'Bajo Riesgo';
+            const excessUnits = Math.max(0, p.stock - p.forecastedDemand);
+            const excessValue = excessUnits * p.price;
+            const barColor = prob >= 70 ? '#dc2626' : prob >= 40 ? '#f59e0b' : '#3b82f6';
+            return `
+            <div class="overstock-card" id="ocard-${p.id}" onclick="selectOverstockProduct(${p.id})">
+                <div class="overstock-card-header">
+                    <div>
+                        <div style="font-weight:700; font-size:0.9rem;">${p.name}</div>
+                        <div style="font-size:0.75rem; color:var(--text-2);">${p.category} · SKU ${String(p.id).padStart(3,'0')}</div>
+                    </div>
+                    <span class="badge badge-${riskLevel}">${riskLabel}</span>
+                </div>
+                <div class="overstock-card-body">
+                    <div style="margin-bottom:0.625rem;">
+                        <div style="display:flex; justify-content:space-between; font-size:0.75rem; margin-bottom:0.25rem;">
+                            <span style="color:var(--text-2);">Probabilidad de Exceso</span>
+                            <strong style="font-family:var(--mono); color:${barColor};">${prob}%</strong>
+                        </div>
+                        <div class="confidence-bar-wrap"><div class="confidence-bar" style="width:${prob}%; background:${barColor};"></div></div>
+                    </div>
+                    <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:0.5rem; font-size:0.75rem; margin-top:0.5rem;">
+                        <div><div style="color:var(--text-2);">Stock</div><strong style="font-family:var(--mono);">${p.stock}</strong></div>
+                        <div><div style="color:var(--text-2);">Demanda</div><strong style="font-family:var(--mono);">${p.forecastedDemand}</strong></div>
+                        <div><div style="color:var(--text-2);">Exceso</div><strong style="font-family:var(--mono); color:var(--red);">${excessUnits}</strong></div>
+                    </div>
+                    <div style="margin-top:0.5rem; font-size:0.75rem;">
+                        <span style="color:var(--text-2);">Valor en riesgo:</span>
+                        <strong style="font-family:var(--mono); color:var(--red);">$${excessValue.toLocaleString('es-AR',{maximumFractionDigits:0})}</strong>
+                        <span style="color:var(--text-2); margin-left:0.5rem;">Vence en:</span>
+                        <strong style="font-family:var(--mono);">${p.expiresInDays}d</strong>
+                    </div>
+                    ${p.factors.length ? `<div style="margin-top:0.5rem;">${p.factors.map(f=>`<span class="badge badge-event">${f}</span>`).join('')}</div>` : ''}
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    function selectOverstockProduct(productId) {
+        document.querySelectorAll('.overstock-card').forEach(c => c.classList.remove('selected'));
+        document.getElementById(`ocard-${productId}`).classList.add('selected');
+        aiState.selectedProduct = currentStoreData.products.find(p => p.id === productId);
+        document.getElementById('btn-to-step-2').disabled = false;
+    }
+
+    // ── STEP 2: Customer Targeting ──
+    function renderStep2() {
+        const p = aiState.selectedProduct;
+        document.getElementById('targeting-product-name').textContent = `Targeting para: ${p.name} — ${p.category} · ${Math.round(Math.max(0, p.stock - p.forecastedDemand))} unidades en exceso`;
+
+        // Behavior Analysis
+        const categories_affinity = ['Mismo producto', 'Misma categoría', 'Categoría complementaria'];
+        const affinityScores = [87, 73, 54];
+        document.getElementById('behavior-analysis').innerHTML = categories_affinity.map((cat, i) => `
+            <div class="sensitivity-row">
+                <div class="sensitivity-label">${cat}</div>
+                <div class="sensitivity-bar-wrap"><div class="sensitivity-bar" style="width:${affinityScores[i]}%; background:var(--blue);"></div></div>
+                <div class="sensitivity-value">${affinityScores[i]}%</div>
+            </div>
+        `).join('') + `<div style="margin-top:0.75rem; font-size:0.75rem; color:var(--text-2);">Modelo: Collaborative Filtering (cosine similarity) · Dataset: 24 meses · AUC: 0.89</div>`;
+
+        // Propensity Segments
+        const segs = currentStoreData.config.customerSegments;
+        document.getElementById('propensity-segments').innerHTML = segs.map((s, i) => {
+            const score = i === 0 ? 78 : 61;
+            return `
+            <div style="margin-bottom:0.625rem;">
+                <div style="display:flex; justify-content:space-between; font-size:0.8rem; margin-bottom:0.25rem;">
+                    <span><strong>${s.name}</strong> · ${s.clients.toLocaleString('es-AR')} clientes</span>
+                    <strong style="color:var(--blue); font-family:var(--mono);">${score}%</strong>
+                </div>
+                <div class="confidence-bar-wrap"><div class="confidence-bar" style="width:${score}%; background:var(--blue);"></div></div>
+            </div>`;
+        }).join('') + `<div style="font-size:0.75rem; color:var(--text-2); margin-top:0.5rem;">Propensity Score = RFM + Historial de Categoría + Afinidad Estacional</div>`;
+
+        // Target Customers
+        const targetCustomers = [
+            { name: 'Segmento A Premium', count: 312, score: 91, rfm: 'Alta', freq: '3.2x/mes', emoji: '👔' },
+            { name: 'Compradores Habituales', count: 487, score: 83, rfm: 'Media-Alta', freq: '2.8x/mes', emoji: '🛒' },
+            { name: 'Compradores Esporádicos', count: 241, score: 71, rfm: 'Media', freq: '1.4x/mes', emoji: '👤' },
+            { name: `${segs[0].name}`, count: Math.floor(segs[0].clients * 0.4), score: 78, rfm: 'Alta', freq: `${segs[0].details.freq}x/mes`, emoji: '⭐' },
+        ];
+        document.getElementById('target-customers').innerHTML = targetCustomers.map(c => `
+            <div class="customer-target-card selected" onclick="this.classList.toggle('selected')">
+                <div class="customer-avatar" style="background:var(--red-light);">${c.emoji}</div>
+                <div style="flex:1;">
+                    <div style="font-weight:600; font-size:0.875rem;">${c.name}</div>
+                    <div style="font-size:0.75rem; color:var(--text-2);">${c.count.toLocaleString('es-AR')} clientes · RFM: ${c.rfm} · ${c.freq}</div>
+                    <div class="confidence-bar-wrap" style="margin-top:0.375rem;"><div class="confidence-bar" style="width:${c.score}%; background:var(--blue);"></div></div>
+                </div>
+                <div>
+                    <div class="customer-match-score" style="color:var(--blue);">${c.score}%</div>
+                    <div style="font-size:0.65rem; color:var(--text-2); text-align:right;">match</div>
+                </div>
+            </div>`).join('');
+    }
+
+    // ── STEP 3: Discount Strategies ──
+    function renderStep3() {
+        const p = aiState.selectedProduct;
+        const excessUnits = Math.max(0, p.stock - p.forecastedDemand);
+        const potentialLoss = excessUnits * p.cost;
+
+        document.getElementById('strategy-context').textContent = `Analizando ${excessUnits} unidades excedentes de ${p.name} · Precio regular: $${p.price.toFixed(0)} · Costo: $${p.cost.toFixed(0)} · Vence en ${p.expiresInDays} días`;
+        document.getElementById('param-cost').textContent = `$${p.cost.toFixed(2)}`;
+        document.getElementById('param-price').textContent = `$${p.price.toFixed(2)}`;
+        document.getElementById('param-units').textContent = excessUnits;
+        document.getElementById('param-days').textContent = `${p.expiresInDays} días`;
+        document.getElementById('param-loss').textContent = `$${potentialLoss.toLocaleString('es-AR',{maximumFractionDigits:0})}`;
+
+        // Calculate ROI for each strategy
+        const strategiesWithROI = discountStrategies.map(s => {
+            const discountedPrice = p.price * (1 - s.discount);
+            const unitsSold = Math.round(excessUnits * s.convRate);
+            const revenue = unitsSold * discountedPrice;
+            const costOfGoodsSold = unitsSold * p.cost;
+            const cashIn = revenue;
+            const cashOut = costOfGoodsSold;
+            const cocReturn = cashOut > 0 ? ((cashIn - cashOut) / cashOut * 100) : 0;
+            const savingsVsLoss = revenue - (excessUnits - unitsSold) * p.cost * 0.5;
+            return { ...s, discountedPrice, unitsSold, revenue, cocReturn, savingsVsLoss };
+        });
+
+        const best = strategiesWithROI.reduce((a,b) => a.cocReturn > b.cocReturn ? a : b);
+
+        document.getElementById('strategy-options').innerHTML = strategiesWithROI.map(s => {
+            const isBest = s.id === best.id;
+            return `
+            <div class="strategy-option ${isBest?'best-pick':''}" id="strat-${s.id}" onclick="selectStrategy('${s.id}')">
+                ${isBest ? '<div class="best-pick-ribbon">✅ MEJOR ROI</div>' : ''}
+                <div style="font-weight:700; font-size:0.95rem; margin-bottom:0.25rem; margin-right:${isBest?'3rem':'0'};">${s.name}</div>
+                <div style="font-size:0.75rem; color:var(--text-2); margin-bottom:0.75rem;">${s.desc}</div>
+                <div style="margin-bottom:0.625rem;">
+                    <div style="font-size:0.7rem; color:var(--text-2);">Retorno Cash/Cash</div>
+                    <div class="strategy-roi" style="color:${isBest?'var(--green)':s.color};">${s.cocReturn.toFixed(1)}%</div>
+                </div>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.375rem; font-size:0.72rem;">
+                    <div><span style="color:var(--text-2);">Descuento:</span> <strong>${Math.round(s.discount*100)}%</strong></div>
+                    <div><span style="color:var(--text-2);">Conv.:</span> <strong>${Math.round(s.convRate*100)}%</strong></div>
+                    <div><span style="color:var(--text-2);">Unidades:</span> <strong style="font-family:var(--mono);">${s.unitsSold}</strong></div>
+                    <div><span style="color:var(--text-2);">Ingreso:</span> <strong style="font-family:var(--mono);">$${(s.revenue/1000).toFixed(1)}K</strong></div>
+                </div>
+                <div style="margin-top:0.625rem;">
+                    <span class="badge badge-info">${s.channel}</span>
+                    <span class="badge ${s.urgency==='Alta'?'badge-danger':s.urgency==='Media'?'badge-warning':'badge-success'}">Urgencia ${s.urgency}</span>
+                </div>
+            </div>`;
+        }).join('');
+
+        // Select best by default
+        aiState.selectedStrategy = best;
+        document.getElementById(`strat-${best.id}`).classList.add('selected');
+
+        // Sensitivity Analysis
+        document.getElementById('sensitivity-analysis').innerHTML = `
+            <div class="sensitivity-row"><div class="sensitivity-label">Precio final</div><div class="sensitivity-bar-wrap"><div class="sensitivity-bar" style="width:85%; background:var(--red);"></div></div><div class="sensitivity-value" style="color:var(--red);">Alto ↑</div></div>
+            <div class="sensitivity-row"><div class="sensitivity-label">Conversión</div><div class="sensitivity-bar-wrap"><div class="sensitivity-bar" style="width:72%; background:var(--amber);"></div></div><div class="sensitivity-value" style="color:var(--amber);">Medio ↑</div></div>
+            <div class="sensitivity-row"><div class="sensitivity-label">% Descuento</div><div class="sensitivity-bar-wrap"><div class="sensitivity-bar" style="width:68%; background:var(--blue);"></div></div><div class="sensitivity-value" style="color:var(--blue);">Medio ↑</div></div>
+            <div class="sensitivity-row"><div class="sensitivity-label">Canal digital</div><div class="sensitivity-bar-wrap"><div class="sensitivity-bar" style="width:55%; background:var(--purple);"></div></div><div class="sensitivity-value" style="color:var(--purple);">Medio ↑</div></div>
+            <div class="sensitivity-row"><div class="sensitivity-label">Días restantes</div><div class="sensitivity-bar-wrap"><div class="sensitivity-bar" style="width:40%; background:var(--green);"></div></div><div class="sensitivity-value" style="color:var(--green);">Bajo ↑</div></div>
+            <div style="font-size:0.72rem; color:var(--text-2); margin-top:0.5rem;">El precio final del producto con descuento tiene el mayor impacto en el retorno cash/cash. Descuentos agresivos (+30%) compensan pérdidas totales en ≈78% de los escenarios simulados.</div>
+        `;
+    }
+
+    function selectStrategy(id) {
+        document.querySelectorAll('.strategy-option').forEach(el => el.classList.remove('selected'));
+        document.getElementById(`strat-${id}`).classList.add('selected');
+        aiState.selectedStrategy = discountStrategies.find(s => s.id === id);
+        // Recalculate ROI for selected
+        const p = aiState.selectedProduct;
+        const excessUnits = Math.max(0, p.stock - p.forecastedDemand);
+        const s = aiState.selectedStrategy;
+        const discountedPrice = p.price * (1 - s.discount);
+        const unitsSold = Math.round(excessUnits * s.convRate);
+        const revenue = unitsSold * discountedPrice;
+        const cogs = unitsSold * p.cost;
+        aiState.selectedStrategy = { ...s, discountedPrice, unitsSold, revenue, cocReturn: cogs > 0 ? ((revenue-cogs)/cogs*100) : 0 };
+    }
+
+    // ── STEP 4: Cash-on-Cash ──
+    function renderStep4() {
+        const p = aiState.selectedProduct;
+        const s = aiState.selectedStrategy;
+        const excessUnits = Math.max(0, p.stock - p.forecastedDemand);
+
+        document.getElementById('final-strategy-name').textContent = `${s.name} — ${s.desc}`;
+        document.getElementById('final-strategy-desc').textContent = `${Math.round(s.convRate*100)}% tasa de conversión estimada · ${s.unitsSold} unidades recuperadas de ${excessUnits} en exceso · Canal: ${s.channel}`;
+        document.getElementById('final-coc-return').textContent = `${s.cocReturn.toFixed(1)}%`;
+
+        const totalRevenue = s.revenue;
+        const totalCost = s.unitsSold * p.cost;
+        const profit = totalRevenue - totalCost;
+        const savingsVsTotal = totalRevenue - (excessUnits * p.cost);
+        const lostUnits = excessUnits - s.unitsSold;
+        const projectedWaste = lostUnits * p.cost;
+
+        document.getElementById('final-kpis').innerHTML = `
+            <div class="kpi-box"><div class="kpi-box-value">$${totalRevenue.toLocaleString('es-AR',{maximumFractionDigits:0})}</div><div class="kpi-box-label">Ingresos Recuperados</div></div>
+            <div class="kpi-box"><div class="kpi-box-value">$${profit.toLocaleString('es-AR',{maximumFractionDigits:0})}</div><div class="kpi-box-label">Ganancia Neta</div></div>
+            <div class="kpi-box"><div class="kpi-box-value">${s.unitsSold}</div><div class="kpi-box-label">Unidades Vendidas</div></div>
+            <div class="kpi-box"><div class="kpi-box-value">$${projectedWaste.toLocaleString('es-AR',{maximumFractionDigits:0})}</div><div class="kpi-box-label">Merma Residual</div></div>
+        `;
+
+        // Comparative chart (all strategies)
+        const allStrategies = discountStrategies.map(st => {
+            const dp = p.price * (1-st.discount);
+            const us = Math.round(excessUnits * st.convRate);
+            const rev = us * dp;
+            const cg = us * p.cost;
+            const coc = cg > 0 ? ((rev-cg)/cg*100) : 0;
+            return { ...st, unitsSold: us, revenue: rev, cocReturn: coc };
+        });
+        const maxCoc = Math.max(...allStrategies.map(st=>st.cocReturn));
+        
+        document.getElementById('coc-chart-container').innerHTML = `
+            <div style="display:flex; flex-direction:column; gap:0.5rem;">
+                ${allStrategies.map(st => {
+                    const isBest = st.id === aiState.selectedStrategy.id;
+                    const barW = maxCoc > 0 ? Math.max(5, (st.cocReturn/maxCoc)*100) : 5;
+                    return `
+                    <div style="display:flex; align-items:center; gap:0.75rem; font-size:0.8rem;">
+                        <div style="width:140px; flex-shrink:0;">${st.name}</div>
+                        <div style="flex:1; background:#f4f4f5; border-radius:2rem; height:28px; overflow:hidden; position:relative;">
+                            <div style="height:100%; width:${barW}%; background:${isBest?'var(--green)':st.color}; border-radius:2rem; display:flex; align-items:center; padding-left:0.5rem; transition:width 0.8s ease;">
+                                <span style="color:white; font-weight:700; font-size:0.75rem; white-space:nowrap;">${st.cocReturn.toFixed(1)}%</span>
+                            </div>
+                        </div>
+                        ${isBest ? '<span class="badge badge-success">Seleccionado</span>' : '<span style="width:80px;"></span>'}
+                    </div>`;
+                }).join('')}
+            </div>
+            <div style="font-size:0.72rem; color:var(--text-2); margin-top:0.75rem;">*Simulación Monte Carlo 10,000 iteraciones · IC 95%</div>
+        `;
+
+        // Channel Breakdown
+        const channels = [
+            { name: '📱 App DIA + Push', clients: Math.round(s.unitsSold * 0.35), conv: '38%', units: Math.round(s.unitsSold * 0.38), rev: Math.round(s.revenue * 0.38) },
+            { name: '📧 Email personalizado', clients: Math.round(s.unitsSold * 0.28), conv: '22%', units: Math.round(s.unitsSold * 0.28), rev: Math.round(s.revenue * 0.28) },
+            { name: '🏪 In-store (señalética)', clients: Math.round(s.unitsSold * 0.22), conv: '15%', units: Math.round(s.unitsSold * 0.22), rev: Math.round(s.revenue * 0.22) },
+            { name: '💬 WhatsApp Business', clients: Math.round(s.unitsSold * 0.15), conv: '45%', units: Math.round(s.unitsSold * 0.12), rev: Math.round(s.revenue * 0.12) },
+        ];
+        document.getElementById('channel-breakdown').innerHTML = channels.map(ch => {
+            const roi = ch.rev > 0 ? ((ch.rev - ch.units * p.cost) / (ch.units * p.cost) * 100).toFixed(1) : '0.0';
+            return `<tr>
+                <td><strong>${ch.name}</strong></td>
+                <td style="text-align:center; font-family:var(--mono);">${ch.clients.toLocaleString('es-AR')}</td>
+                <td style="text-align:center;"><span class="badge badge-info">${ch.conv}</span></td>
+                <td style="text-align:center; font-family:var(--mono);">${ch.units}</td>
+                <td style="text-align:center; font-family:var(--mono);">$${ch.rev.toLocaleString('es-AR',{maximumFractionDigits:0})}</td>
+                <td style="text-align:center;"><span class="badge badge-success">${roi}%</span></td>
+            </tr>`;
+        }).join('');
+    }
+
+    function goToStep(step) {
+        aiState.step = step;
+        updatePipelineUI();
+        if (step === 2) renderStep2();
+        if (step === 3) renderStep3();
+        if (step === 4) renderStep4();
+        document.getElementById('ai-engine').scrollIntoView({behavior:'smooth', block:'start'});
+    }
+
+    function launchCampaign() {
+        const p = aiState.selectedProduct;
+        const s = aiState.selectedStrategy;
+        showConfirmationModal('🚀', 'Campaña Lanzada', `Campaña "${s.name}" activada para ${p.name} en ${currentStoreData.config.name}. ${s.unitsSold} clientes serán notificados vía ${s.channel}. El sistema monitoreará conversiones en tiempo real.`);
+    }
+    function exportReport() {
+        showConfirmationModal('📄', 'Informe Exportado', `Informe de análisis IA exportado como PDF. Incluye predicción ML, targeting de clientes, comparativa de estrategias y proyección cash/cash para ${currentStoreData.config.name}.`);
+    }
+    function resetEngine() {
+        aiState = { step: 1, selectedProduct: null, selectedCustomers: [], selectedStrategy: null };
+        document.getElementById('ml-log-container').style.display = 'none';
+        document.getElementById('overstock-results').style.display = 'none';
+        document.getElementById('btn-to-step-2').disabled = true;
+        updatePipelineUI();
+    }
+
+    // ══════════════════════════════════════════════════════════
+    // REMAINING TAB RENDERS
+    // ══════════════════════════════════════════════════════════
+    function renderInventoryTab() {
+        if (!currentStoreData) return;
+        document.getElementById('at-risk-item-table-body').innerHTML = currentStoreData.atRiskProducts.map(p => `
+            <tr>
+                <td><strong>${p.name}</strong><br><small style="color:var(--text-2);">${p.category}</small></td>
+                <td style="text-align:center; font-family:var(--mono);">${String(p.id).padStart(3,'0')}</td>
+                <td style="text-align:center; font-family:var(--mono);">${p.stock}</td>
+                <td style="text-align:center; font-family:var(--mono);">$${(p.price*p.stock).toFixed(0)}</td>
+                <td style="text-align:center;"><span class="badge badge-danger">${p.expiresInDays}d</span></td>
+                <td style="text-align:center;"><button class="btn btn-primary" style="padding:0.4rem 0.875rem; font-size:0.8rem;" onclick="handleItemAction(${p.id})">Acción</button></td>
+            </tr>`).join('');
+    }
+
+    function renderCustomersTab() {
+        if (!currentStoreData) return;
+        const segments = currentStoreData.config.customerSegments || [];
+        document.getElementById('customer-segment-list').innerHTML = segments.map(s => {
+            const statusBadge = s.status==='En Riesgo'?'badge-danger':s.status==='En Atención'?'badge-warning':'badge-success';
+            const trendArrow = s.tendency==='up'?'▲':s.tendency==='down'?'▼':'▬';
+            const trendColor = s.tendency==='up'?'trend-up':s.tendency==='down'?'trend-down':'';
+            return `<div class="card">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:0.5rem;">
+                    <div class="card-title" style="margin:0;">${s.name}</div>
+                    <span class="badge ${statusBadge}">${s.status}</span>
+                </div>
+                <p style="font-size:0.875rem; margin-bottom:0.75rem;"><strong style="font-family:var(--mono);">${s.clients.toLocaleString('es-AR')}</strong> clientes</p>
+                <div style="display:grid; grid-template-columns:repeat(3,1fr); margin-bottom:0.875rem; text-align:center;">
+                    <div><div class="card-subtitle">Ticket</div><strong>$${s.details.basket.toFixed(0)}</strong></div>
+                    <div><div class="card-subtitle">Frecuencia</div><strong>${s.details.freq}x</strong></div>
+                    <div><div class="card-subtitle">Tendencia</div><strong class="${trendColor}">${trendArrow}</strong></div>
+                </div>
+                <div style="margin-bottom:0.625rem; font-size:0.75rem; font-weight:600; text-transform:uppercase; letter-spacing:0.4px; color:var(--text-2);">Sugerencias</div>
+                <div style="display:flex; flex-wrap:wrap;">${s.strategic_suggestions.map(sug=>`<button class="btn btn-strategy" onclick="handleStrategyClick('${sug.action}',${s.id})">${sug.text}</button>`).join('')}</div>
+            </div>`;
+        }).join('');
+    }
+
+    function renderForecastTab() {
+        if (!currentStoreData) return;
+        const config = currentStoreData.config;
+        const fd = (d) => new Date(d+'T00:00:00').toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit'});
+        document.getElementById('weather-forecast').innerHTML = config.weather.map(w=>`<div><div class="day">${w.day}</div><div class="weather-icon">${w.condition}</div><div class="temp">${w.temp}</div></div>`).join('');
+        
+        let localEvents=[{name:'Sin eventos programados', date:'2025-09-01'}];
+        let localMatches=[{home_team:'Sin partidos', away_team:'locales', date:'2025-09-01', location:''}];
+        if(currentStore==='bsas_centro'){ localEvents=[{name:'Expo Oficinas Centro', date:'2025-09-15'}]; localMatches=[{home_team:'Boca',away_team:'River',date:'2025-09-12',location:'La Bombonera'}]; }
+        else if(currentStore==='cordoba'){ localEvents=[{name:'Inicio Ciclo Lectivo UNC', date:'2025-08-25'}]; localMatches=[{home_team:'Talleres',away_team:'Belgrano',date:'2025-08-28',location:'Mario Kempes'}]; }
+        else if(currentStore==='mendoza'){ localEvents=[{name:'Festival de la Vendimia', date:'2025-09-10'}]; }
+        else if(currentStore==='mar_del_plata'){ localEvents=[{name:'Festival de Cine', date:'2025-08-30'}]; }
+        
+        document.getElementById('events-list').innerHTML = localEvents.map(e=>`<li><strong>${fd(e.date)}:</strong> ${e.name}</li>`).join('');
+        document.getElementById('matches-list').innerHTML = localMatches.map(m=>`<li><strong>${fd(m.date)}:</strong> ${m.home_team} vs ${m.away_team} ${m.location?`<small>(${m.location})</small>`:''}</li>`).join('');
+        
+        document.getElementById('forecast-table-body').innerHTML = currentStoreData.products.slice(0,15).map(p => {
+            const diff = p.stock - p.forecastedDemand;
+            let status, bc, rec, icon;
+            if(diff>p.stock*0.2){status='Exceso';bc='badge-info';rec='Promocionar';icon='💡';}
+            else if(diff<p.stock*-0.2){status='Crítico';bc='badge-danger';rec='Reponer';icon='🛒';}
+            else{status='Estable';bc='badge-success';rec='Mantener';icon='✅';}
+            return `<tr><td><strong>${p.name}</strong><br><small style="color:var(--text-2);">${p.category}</small></td><td style="text-align:center;font-family:var(--mono);">${p.stock}</td><td style="text-align:center;font-family:var(--mono);">${p.forecastedDemand}</td><td>${p.factors.map(f=>`<span class="badge badge-event">${f}</span>`).join(' ')||'N/A'}</td><td style="text-align:center;"><span class="badge ${bc}">${status}</span></td><td class="clickable" onclick="handleForecastAction('${rec}','${p.name}')">${icon} ${rec}</td></tr>`;
+        }).join('');
+    }
+
+    function renderChefIATab() {
+        if (!currentStoreData) return;
+        const segs = currentStoreData.config.customerSegments || [];
+        document.getElementById('chef-ia-segments').innerHTML = segs.map(s=>`<div id="segment-card-${s.id}" class="card selectable-card" onclick="selectCustomerSegment(event,${s.id})"><div class="card-title">${s.name}</div><p class="card-subtitle">${s.clients.toLocaleString('es-AR')} clientes</p></div>`).join('');
+    }
+
+    function renderInsightsTab() {
+        if (!currentStoreData) return;
+        const ov = currentStoreData.atRiskProducts.reduce((s,p)=>s+p.stock*p.price,0);
+        const lr = ov * 0.18;
+        document.getElementById('insights-overstock-value').textContent = `$${ov.toLocaleString('es-AR',{maximumFractionDigits:0})}`;
+        document.getElementById('insights-recipe-impact').textContent = `$${lr.toLocaleString('es-AR',{maximumFractionDigits:0})}`;
+        document.getElementById('insights-losses-reduced').textContent = `$${lr.toLocaleString('es-AR',{maximumFractionDigits:0})}`;
+        document.getElementById('insights-annual-projection').textContent = `$${(lr*12).toLocaleString('es-AR',{maximumFractionDigits:0})}`;
+    }
+
+    function renderComparisonTab() {
+        const grid = document.getElementById('comparison-grid');
+        grid.innerHTML = '';
+        Object.keys(storeConfigs).forEach(storeId => {
+            const sd = generateStoreData(storeId);
+            const config = sd.config;
+            const kpis = config.kpis;
+            const atRiskValue = sd.atRiskProducts.reduce((s,p)=>s+p.stock*p.price,0);
+            const div = document.createElement('div');
+            div.className = 'comparison-store';
+            div.innerHTML = `<h3>${config.name}</h3><div class="comparison-metrics">
+                <div class="comparison-metric"><span>Tipo:</span><strong>${config.type}</strong></div>
+                <div class="comparison-metric"><span>Clientes Activos:</span><strong style="font-family:var(--mono);">${kpis.totalClients.current.toLocaleString('es-AR')}</strong></div>
+                <div class="comparison-metric"><span>Ticket Promedio:</span><strong style="font-family:var(--mono);">$${kpis.avgBasket.current.toFixed(0)}</strong></div>
+                <div class="comparison-metric"><span>Productos en Riesgo:</span><strong style="color:var(--red); font-family:var(--mono);">${sd.atRiskProducts.length}</strong></div>
+                <div class="comparison-metric"><span>Valor en Riesgo:</span><strong style="color:var(--red); font-family:var(--mono);">$${(atRiskValue/1000).toFixed(0)}K</strong></div>
+                <div class="comparison-metric"><span>Ventas YTD:</span><strong style="color:var(--green); font-family:var(--mono);">$${(kpis.ytdRevenue.current/1000000).toFixed(1)}M</strong></div>
+            </div>`;
+            grid.appendChild(div);
+        });
+    }
+
+    // ══════════════════════════════════════════════════════════
+    // SHARED UTILITIES
+    // ══════════════════════════════════════════════════════════
+    function showTab(event, tabName) {
+        document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
+        document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+        document.getElementById(tabName).classList.add('active');
+        const btn = document.querySelector(`.nav-tab[onclick*="'${tabName}'"]`);
+        if(btn) btn.classList.add('active');
+        renderCurrentTab();
+    }
+
+    function handleStrategyClick(action, segmentId) {
+        showConfirmationModal('💡', 'Simulación de Estrategia', `Acción '${action}' aplicada para el segmento en ${currentStoreData.config.name}.`);
+    }
+
+    function handleItemAction(productId) {
+        const p = currentStoreData.products.find(p=>p.id===productId);
+        document.getElementById('action-modal-title').textContent = `Acciones para: ${p.name}`;
+        document.getElementById('action-modal-buttons').innerHTML = `
+            <button class="btn btn-primary" onclick="showTab(null,'ai-engine'); hideActionModal();">🧠 Analizar con Motor IA</button>
+            <button class="btn btn-primary" onclick="showTab(null,'chef-lidy'); hideActionModal();">👨‍🍳 Crear Receta</button>
+            <button class="btn btn-secondary" onclick="showConfirmationModal('💰','Descuento Aplicado','Descuento del 30% aplicado a ${p.name}.'); hideActionModal();">💰 Aplicar Descuento Rápido</button>`;
+        document.getElementById('action-modal').style.display = 'flex';
+    }
+
+    function handleForecastAction(action, productName) {
+        showConfirmationModal('📊', 'Acción de Pronóstico', `${action} ejecutado para ${productName} en ${currentStoreData.config.name}.`);
+    }
+
+    function handleInsightClick(type) {
+        const msgs = {
+            overstock:{t:'Reporte de Exceso',m:'Análisis de exceso completado para esta sucursal.'},
+            recipe:{t:'Reporte de Recetas',m:'Impacto de recetas analizado para esta sucursal.'},
+            losses:{t:'Reducción de Pérdidas',m:'Análisis de pérdidas disponible.'},
+            projection:{t:'Proyección Anual',m:'Proyecciones anuales calculadas.'}
+        };
+        showConfirmationModal('💡', msgs[type].t, msgs[type].m);
+    }
+
+    function selectCustomerSegment(event, segmentId) {
+        document.querySelectorAll('#chef-ia-segments .selectable-card').forEach(c=>c.classList.remove('selected'));
+        event.currentTarget.classList.add('selected');
+        const segs = currentStoreData.config.customerSegments || [];
+        const seg = segs.find(s=>s.id===segmentId);
+        const recChef = seg ? seg.recommendedChef || 2 : 2;
+        document.getElementById('chef-ia-chef-list').innerHTML = chefs.map(c=>`<div class="card selectable-card ${c.id===recChef?'selected':''}" onclick="selectChef(event,${segmentId},${c.id})"><div class="card-title">${c.name}</div><p class="card-subtitle">${c.specialty}</p></div>`).join('');
+        document.getElementById('chef-selection-column').classList.remove('disabled');
+        selectChef(null, segmentId, recChef);
+    }
+
+    function selectChef(event, segmentId, chefId) {
+        if(event){ document.querySelectorAll('#chef-ia-chef-list .selectable-card').forEach(c=>c.classList.remove('selected')); event.currentTarget.classList.add('selected'); }
+        generatedRecipes = [];
+        const templates = fullRecipeBook[segmentId] || fullRecipeBook[1];
+        const eligible = currentStoreData.atRiskProducts.filter(p=>p.category!=='Bebidas');
+        let used = new Set();
+        for(const t of templates){
+            if(generatedRecipes.length>=3) break;
+            const p = eligible.find(p=>t.category.includes(p.category)&&!used.has(p.id));
+            if(p){ used.add(p.id); generatedRecipes.push({id:`gen_${segmentId}_${p.id}`, name:t.name.replace('{product}',p.name), mainIngredient:p.name, time:t.time, difficulty:t.difficulty}); }
+        }
+        const el = document.getElementById('chef-ia-recipes-container');
+        el.innerHTML = generatedRecipes.length > 0 
+            ? generatedRecipes.map(r=>`<div class="recipe-item"><input type="checkbox" id="recipe-${r.id}" data-recipe-id="${r.id}"><label for="recipe-${r.id}" class="recipe-item-info"><h4>${r.name}</h4><p>${r.time} · ${r.difficulty}</p></label></div>`).join('')
+            : '<p class="card-subtitle">No se encontraron recetas compatibles para los productos en riesgo actuales.</p>';
+        document.getElementById('chef-ia-results-container').style.display = 'block';
+    }
+
+    function createEmailCampaignFromSelected() {
+        const checked = document.querySelectorAll('#chef-ia-recipes-container input[type="checkbox"]:checked');
+        if(!checked.length){ showConfirmationModal('⚠️','Atención','Seleccioná al menos una receta.'); return; }
+        showConfirmationModal('✅','Campaña Creada',`Campaña con ${checked.length} receta(s) creada para ${currentStoreData.config.name}.`);
+    }
+
+    function hideActionModal() { document.getElementById('action-modal').style.display = 'none'; }
+
+    function showConfirmationModal(icon, title, message) {
+        document.getElementById('confirmation-icon').textContent = icon;
+        document.getElementById('confirmation-title').textContent = title;
+        document.getElementById('confirmation-message').innerHTML = message;
+        document.getElementById('confirmation-modal').style.display = 'flex';
+    }
+
+    // ══════════════════════════════════════════════════════════
+    // INIT
+    // ══════════════════════════════════════════════════════════
+    function initApp() {
+        currentStoreData = generateStoreData(currentStore);
+        updateStoreDisplay();
+        renderManagerViewTab();
+        updatePipelineUI();
+        renderInventoryTab();
+        renderForecastTab();
+        renderCustomersTab();
+        renderChefIATab();
+        renderInsightsTab();
+
+        document.querySelectorAll('.modal-close').forEach(btn => btn.addEventListener('click', e => e.currentTarget.closest('.modal-overlay').style.display='none'));
+        document.getElementById('confirmation-close').addEventListener('click', ()=>document.getElementById('confirmation-modal').style.display='none');
+        document.querySelectorAll('.modal-overlay').forEach(m=>m.addEventListener('click',e=>{ if(e.target===m) m.style.display='none'; }));
+    }
+
+    // ══════════════════════════════════════════════════════════
+    // LANGUAGE / i18n SYSTEM
+    // ══════════════════════════════════════════════════════════
+    let currentLang = 'es';
+
+    const translations = {
+        es: {
+            subtitle: 'Plataforma IA Multi-Sucursal · Motor de Optimización Predictiva',
+            nav_panel: '📊 Panel',
+            nav_ai: '🧠 Motor IA',
+            nav_stock: '📦 Stock',
+            nav_customers: '👥 Clientes',
+            nav_forecast: '📈 Pronóstico',
+            nav_chef: '👨‍🍳 Chef IA',
+            nav_insights: '💡 Insights',
+            nav_compare: '🔍 Comparar',
+            stock_summary: '📦 Resumen de Stock',
+            perishable_skus: 'SKUs Perecederos',
+            at_risk_products: 'Productos en Riesgo',
+            stock_value: 'Valor en Stock',
+            at_risk_value: 'Valor en Riesgo',
+            customer_summary: '👥 Resumen de Clientes',
+            ai_alert_title: '🧠 Motor IA detectó oportunidades de optimización',
+            view_ai_analysis: 'Ver Análisis IA →',
+            step1_label: 'Paso 1\nPredicción\nde Exceso',
+            step2_label: 'Paso 2\nTargeting\nde Clientes',
+            step3_label: 'Paso 3\nEstrategia\nde Descuento',
+            step4_label: 'Paso 4\nRetorno\nCash/Cash',
+            step1_title: '🔮 Paso 1 — Predicción de Exceso de Stock con ML',
+            ml_engine_title: 'Motor de Machine Learning — Gradient Boosting + Series de Tiempo',
+            ml_engine_desc: 'El modelo analiza ventas históricas, estacionalidad, clima y eventos locales para predecir probabilidad de exceso en los próximos 7 días',
+            run_model: '▶ Ejecutar Modelo',
+            inventory_title: '📦 Productos en Riesgo de Stock',
+            col_product: 'Producto',
+            col_sku: 'SKU',
+            col_stock: 'Stock',
+            col_at_risk_value: 'Valor en Riesgo',
+            col_expires: 'Vence en',
+            col_action: 'Acción',
+            forecast_external: '🌍 Factores Externos (próx. 7 días)',
+            events_title: '📅 Eventos',
+            matches_title: '⚽ Partidos',
+            weather_title: '🌦️ Clima',
+            demand_forecast: '📈 Pronóstico de Demanda',
+            col_expected_demand: 'Demanda Prevista',
+            col_influence: 'Factores de Influencia',
+            col_status: 'Estado',
+            col_recommendation: 'Recomendación',
+            chef_step1: 'Paso 1: Seleccioná el Segmento',
+            chef_step2: 'Paso 2: Elegí el Chef',
+            chef_step3: 'Paso 3: Seleccioná las Recetas',
+            create_campaign: 'Crear Campaña',
+            insights_panel_title: 'Panel de Impacto de la Plataforma',
+            overstock_managed: 'Valor de Exceso Gestionado (Mes)',
+            recipe_impact: 'Impacto de Recetas Promovidas',
+            losses_reduced: 'Pérdidas Totales Reducidas',
+            annual_projection: 'Proyección Anual de Reducción',
+            comparison_title: '🔍 Comparación Multi-Sucursal',
+            close_btn: 'Cerrar',
+        },
+        en: {
+            subtitle: 'Multi-Branch AI Platform · Predictive Optimization Engine',
+            nav_panel: '📊 Dashboard',
+            nav_ai: '🧠 AI Engine',
+            nav_stock: '📦 Inventory',
+            nav_customers: '👥 Customers',
+            nav_forecast: '📈 Forecast',
+            nav_chef: '👨‍🍳 AI Chef',
+            nav_insights: '💡 Insights',
+            nav_compare: '🔍 Compare',
+            stock_summary: '📦 Stock Summary',
+            perishable_skus: 'Perishable SKUs',
+            at_risk_products: 'At-Risk Products',
+            stock_value: 'Stock Value',
+            at_risk_value: 'At-Risk Value',
+            customer_summary: '👥 Customer Summary',
+            ai_alert_title: '🧠 AI Engine detected optimization opportunities',
+            view_ai_analysis: 'View AI Analysis →',
+            step1_label: 'Step 1\nOverstock\nPrediction',
+            step2_label: 'Step 2\nCustomer\nTargeting',
+            step3_label: 'Step 3\nDiscount\nStrategy',
+            step4_label: 'Step 4\nCash-on-Cash\nReturn',
+            step1_title: '🔮 Step 1 — ML Overstock Prediction',
+            ml_engine_title: 'Machine Learning Engine — Gradient Boosting + Time Series',
+            ml_engine_desc: 'The model analyzes historical sales, seasonality, weather and local events to predict overstock probability for the next 7 days',
+            run_model: '▶ Run Model',
+            inventory_title: '📦 At-Risk Products',
+            col_product: 'Product',
+            col_sku: 'SKU',
+            col_stock: 'Stock',
+            col_at_risk_value: 'At-Risk Value',
+            col_expires: 'Expires in',
+            col_action: 'Action',
+            forecast_external: '🌍 External Factors (next 7 days)',
+            events_title: '📅 Events',
+            matches_title: '⚽ Matches',
+            weather_title: '🌦️ Weather',
+            demand_forecast: '📈 Demand Forecast',
+            col_expected_demand: 'Expected Demand',
+            col_influence: 'Influence Factors',
+            col_status: 'Status',
+            col_recommendation: 'Recommendation',
+            chef_step1: 'Step 1: Select Segment',
+            chef_step2: 'Step 2: Choose Chef',
+            chef_step3: 'Step 3: Select Recipes',
+            create_campaign: 'Create Campaign',
+            insights_panel_title: 'Platform Impact Dashboard',
+            overstock_managed: 'Managed Overstock Value (Month)',
+            recipe_impact: 'Promoted Recipes Impact',
+            losses_reduced: 'Total Losses Reduced',
+            annual_projection: 'Annual Reduction Projection',
+            comparison_title: '🔍 Multi-Branch Comparison',
+            close_btn: 'Close',
+        }
+    };
+
+    function applyTranslations(lang) {
+        const t = translations[lang];
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+            const key = el.getAttribute('data-i18n');
+            if (t[key] !== undefined) {
+                // For pipeline labels that use <br> — preserve HTML
+                if (key.endsWith('_label')) {
+                    el.innerHTML = t[key].replace(/\n/g, '<br>');
+                } else {
+                    el.textContent = t[key];
+                }
+            }
+        });
+        // Update nav_ai to keep the notif-dot span
+        const aiNavBtn = document.querySelector('.nav-tab.nav-highlight');
+        if (aiNavBtn) {
+            const dot = aiNavBtn.querySelector('.notif-dot');
+            aiNavBtn.textContent = t['nav_ai'] + ' ';
+            if (dot) aiNavBtn.appendChild(dot);
+        }
+    }
+
+    function toggleLanguage() {
+        currentLang = currentLang === 'es' ? 'en' : 'es';
+        document.getElementById('lang-es').classList.toggle('active', currentLang === 'es');
+        document.getElementById('lang-en').classList.toggle('active', currentLang === 'en');
+        applyTranslations(currentLang);
+    }
+
+    document.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+</html>
