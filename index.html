@@ -329,6 +329,67 @@
         }
         .customer-match-score { font-family: var(--mono); font-size: 1.25rem; font-weight: 700; }
 
+        /* Segment Type Cards */
+        .segment-type-card {
+            border: 2px solid var(--border); border-radius: 0.875rem;
+            overflow: hidden; transition: all 0.2s; background: white;
+        }
+        .segment-type-card.seg-selected { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(59,130,246,0.12); }
+        .segment-type-card.seg-selected .seg-header { background: #eff6ff; }
+        .seg-header {
+            padding: 1rem 1.125rem; background: #fafafa;
+            border-bottom: 1px solid var(--border);
+            display: flex; align-items: flex-start; gap: 0.875rem; cursor: pointer;
+        }
+        .seg-icon {
+            width: 3rem; height: 3rem; border-radius: 0.625rem;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.5rem; flex-shrink: 0;
+        }
+        .seg-body { padding: 1rem 1.125rem; }
+        .seg-stat-row { display: flex; gap: 1.25rem; flex-wrap: wrap; margin: 0.625rem 0; }
+        .seg-stat { text-align: center; }
+        .seg-stat-val { font-size: 1rem; font-weight: 700; font-family: var(--mono); color: var(--text); }
+        .seg-stat-lbl { font-size: 0.65rem; color: var(--text-2); text-transform: uppercase; letter-spacing: 0.4px; }
+        .seg-members-list {
+            display: none; margin-top: 0.75rem;
+            background: #f9f9fb; border-radius: 0.5rem;
+            border: 1px solid var(--border); overflow: hidden;
+        }
+        .seg-members-list.open { display: block; }
+        .seg-member-row {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0.45rem 0.875rem; font-size: 0.78rem;
+            border-bottom: 1px solid var(--border);
+        }
+        .seg-member-row:last-child { border-bottom: none; }
+        .seg-member-row:hover { background: #f0f4ff; }
+        .toggle-members-btn {
+            font-size: 0.75rem; color: var(--blue); cursor: pointer;
+            display: inline-flex; align-items: center; gap: 0.25rem;
+            border: none; background: none; padding: 0; font-family: inherit; font-weight: 600;
+        }
+        .toggle-members-btn:hover { text-decoration: underline; }
+        .include-checkbox {
+            width: 1.1rem; height: 1.1rem; accent-color: var(--blue);
+            cursor: pointer; flex-shrink: 0;
+        }
+
+        /* Campaign Builder */
+        .campaign-builder {
+            background: linear-gradient(135deg, #eff6ff, #dbeafe);
+            border: 1.5px solid #93c5fd; border-radius: 0.875rem;
+            padding: 1.25rem; margin-top: 1.25rem;
+        }
+        .channel-pill {
+            display: inline-flex; align-items: center; gap: 0.35rem;
+            padding: 0.375rem 0.75rem; border-radius: 2rem;
+            border: 2px solid var(--border); background: white;
+            font-size: 0.78rem; font-weight: 600; cursor: pointer;
+            transition: all 0.18s;
+        }
+        .channel-pill.ch-selected { border-color: var(--blue); background: var(--blue); color: white; }
+
         /* Discount Strategy */
         .strategy-option {
             border: 2px solid var(--border); border-radius: 0.75rem; padding: 1rem;
@@ -577,12 +638,57 @@
                     </div>
                 </div>
 
-                <h3 style="font-weight:600; margin-bottom:0.75rem; font-size:0.875rem; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-2);">Top Clientes Objetivo — Propensity Score ≥ 65%</h3>
-                <div class="grid grid-cols-2" id="target-customers" style="margin-bottom:1rem;"></div>
+                <h3 style="font-weight:600; margin-bottom:0.75rem; font-size:0.875rem; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-2);">Tipos de Cliente Objetivo — Seleccioná los segmentos para la campaña</h3>
+                <div id="target-customers" style="display:flex; flex-direction:column; gap:0.875rem; margin-bottom:1rem;"></div>
+
+                <!-- Campaign Builder -->
+                <div class="campaign-builder" id="campaign-builder-panel" style="display:none;">
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:1rem; margin-bottom:1rem;">
+                        <div>
+                            <div style="font-weight:700; font-size:1rem; margin-bottom:0.25rem;">🚀 Configurar Campaña Digital</div>
+                            <div id="campaign-summary-line" style="font-size:0.82rem; color:#1e40af;"></div>
+                        </div>
+                        <div id="campaign-total-badge" style="font-family:var(--mono); font-size:1.5rem; font-weight:800; color:var(--blue);"></div>
+                    </div>
+                    <div style="margin-bottom:1rem;">
+                        <div style="font-size:0.75rem; font-weight:600; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-2); margin-bottom:0.5rem;">Canales de comunicación</div>
+                        <div style="display:flex; flex-wrap:wrap; gap:0.5rem;">
+                            <button class="channel-pill ch-selected" onclick="toggleChannel(this,'email')">📧 Email</button>
+                            <button class="channel-pill ch-selected" onclick="toggleChannel(this,'push')">📱 Push Notif.</button>
+                            <button class="channel-pill" onclick="toggleChannel(this,'whatsapp')">💬 WhatsApp</button>
+                            <button class="channel-pill" onclick="toggleChannel(this,'sms')">💬 SMS</button>
+                            <button class="channel-pill ch-selected" onclick="toggleChannel(this,'instore')">🏪 In-store</button>
+                        </div>
+                    </div>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1rem;">
+                        <div>
+                            <div style="font-size:0.75rem; font-weight:600; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-2); margin-bottom:0.375rem;">Mensaje de campaña</div>
+                            <textarea id="campaign-message" rows="3" style="width:100%; border:1.5px solid var(--border); border-radius:0.5rem; padding:0.625rem; font-family:inherit; font-size:0.82rem; resize:vertical; outline:none;" placeholder="Ej: Aprovechá este descuento exclusivo por 24hs..."></textarea>
+                        </div>
+                        <div>
+                            <div style="font-size:0.75rem; font-weight:600; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-2); margin-bottom:0.375rem;">Timing de envío</div>
+                            <select style="width:100%; border:1.5px solid var(--border); border-radius:0.5rem; padding:0.625rem; font-family:inherit; font-size:0.82rem; background:white; margin-bottom:0.5rem;">
+                                <option>Inmediato</option>
+                                <option>En 1 hora</option>
+                                <option>Hoy a las 18:00</option>
+                                <option>Mañana a las 09:00</option>
+                                <option>Fin de semana</option>
+                            </select>
+                            <select style="width:100%; border:1.5px solid var(--border); border-radius:0.5rem; padding:0.625rem; font-family:inherit; font-size:0.82rem; background:white;">
+                                <option>Personalizar con nombre del cliente</option>
+                                <option>Mensaje genérico</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div style="display:flex; justify-content:flex-end; gap:0.75rem; flex-wrap:wrap;">
+                        <button class="btn btn-secondary" onclick="previewCampaign()">👁 Preview</button>
+                        <button class="btn btn-primary" onclick="goToStep(3)">Continuar → Diseñar Descuento</button>
+                    </div>
+                </div>
 
                 <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.75rem; margin-top:1rem;">
                     <button class="btn btn-secondary" onclick="goToStep(1)">← Volver</button>
-                    <button class="btn btn-primary" onclick="goToStep(3)">Continuar → Diseñar Descuento</button>
+                    <div id="step2-continue-hint" style="font-size:0.8rem; color:var(--text-2);">Seleccioná al menos un tipo de cliente para continuar</div>
                 </div>
             </div>
 
@@ -1187,6 +1293,19 @@
                 </div>
             </div>`;
         }).join('');
+
+        // Auto-select the highest-risk product so Continuar is immediately enabled
+        if (products.length > 0) {
+            const topProduct = products[0];
+            selectOverstockProduct(topProduct.id);
+            // Brief highlight pulse to show it was auto-selected
+            const card = document.getElementById(`ocard-${topProduct.id}`);
+            if (card) {
+                card.style.transition = 'box-shadow 0.4s ease';
+                card.style.boxShadow = '0 0 0 4px rgba(227,30,36,0.35)';
+                setTimeout(() => { card.style.boxShadow = ''; }, 1200);
+            }
+        }
     }
 
     function selectOverstockProduct(productId) {
@@ -1197,8 +1316,100 @@
     }
 
     // ── STEP 2: Customer Targeting ──
+    let selectedSegmentTypes = new Set();
+
+    // Sample member name pools by demographic flavour
+    const memberNamePools = {
+        premium:    ['Valentina R.','Martín G.','Lucía M.','Andrés S.','Camila F.','Federico L.','Isabella T.','Santiago B.','Natalia V.','Ignacio P.'],
+        family:     ['María J.','Carlos P.','Ana L.','Roberto M.','Silvia C.','Pablo H.','Laura G.','Diego A.','Claudia E.','Gustavo N.'],
+        student:    ['Sofía K.','Tomás D.','Florencia R.','Mateo V.','Agustina M.','Facundo B.','Julieta S.','Nicolás F.','Pilar C.','Ramiro T.'],
+        retiree:    ['Graciela O.','Héctor A.','Nora B.','Juan C.','Elsa M.','Raúl F.','Mirta G.','Alberto H.','Rosa S.','Eduardo P.'],
+        tourist:    ['James W.','Marie D.','Hans K.','Giulia R.','Emma S.','Luca M.','Claire B.','Pedro A.','Yuki T.','Amir N.'],
+        worker:     ['Daniela V.','Rodrigo M.','Paola R.','Emanuel C.','Verónica S.','Leonardo B.','Cecilia F.','Maximiliano T.','Jimena A.','Cristian L.'],
+    };
+
+    // Extended segment type definitions keyed by store segment id
+    const segmentTypeProfiles = {
+        // Each store has customerSegments with id 1 and 2 — we enrich them here
+        default: [
+            {
+                id: 'seg_1',
+                storeSegIdx: 0,
+                icon: '⭐',
+                iconBg: '#fef3c7',
+                propensity: 89,
+                rfm: 'A+',
+                rfmColor: '#166534',
+                rfmBg: '#dcfce7',
+                namePool: 'premium',
+                description: 'Compradores de alto valor con historial frecuente en la categoría. Alta disposición a pagar precio con descuento moderado. Responden mejor a canales digitales personalizados.',
+                channel: 'Email + App',
+                avgBasketMult: 1.15,
+                freqDesc: 'Alta',
+                bestDiscount: '15–25%',
+            },
+            {
+                id: 'seg_2',
+                storeSegIdx: 1,
+                icon: '🛒',
+                iconBg: '#dbeafe',
+                propensity: 76,
+                rfm: 'B+',
+                rfmColor: '#1e40af',
+                rfmBg: '#dbeafe',
+                namePool: 'family',
+                description: 'Compradores regulares orientados al valor. Sensibles a promociones 2x1 y descuentos de oportunidad. Activos en in-store y responden bien a push notifications.',
+                channel: 'Push + In-store',
+                avgBasketMult: 0.95,
+                freqDesc: 'Media-Alta',
+                bestDiscount: '25–35%',
+            },
+            {
+                id: 'seg_3',
+                icon: '🔁',
+                iconBg: '#f3e8ff',
+                propensity: 64,
+                rfm: 'B',
+                rfmColor: '#5b21b6',
+                rfmBg: '#ede9fe',
+                namePool: 'worker',
+                description: 'Clientes esporádicos con compras concentradas en momentos específicos (payday, fin de semana). Reactivan bien con ofertas flash de alta urgencia.',
+                channel: 'SMS + WhatsApp',
+                avgBasketMult: 0.78,
+                freqDesc: 'Media',
+                bestDiscount: '30–40%',
+                extraCount: true, // count derived from store perishable data
+            },
+        ]
+    };
+
+    function buildSegmentTypes(storeData) {
+        const segs = storeData.config.customerSegments;
+        const profiles = segmentTypeProfiles.default;
+        return profiles.map((prof, idx) => {
+            const storeSeg = segs[prof.storeSegIdx !== undefined ? prof.storeSegIdx : Math.min(idx, segs.length-1)];
+            const clientCount = storeSeg
+                ? (prof.extraCount ? Math.floor(storeSeg.clients * 0.35) : storeSeg.clients)
+                : Math.floor(storeData.config.kpis.totalClients.current * (0.3 - idx * 0.08));
+            const avgBasket = storeSeg
+                ? (storeSeg.details.basket * prof.avgBasketMult)
+                : (storeData.config.kpis.avgBasket.current * prof.avgBasketMult);
+            const names = memberNamePools[prof.namePool];
+            // Pick 6 sample members with simulated data
+            const members = names.slice(0, 6).map((name, i) => ({
+                name,
+                id: `CLI-${String(Math.floor(10000 + idx * 3000 + i * 317)).padStart(5,'0')}`,
+                basket: `$${(avgBasket * (0.85 + Math.random()*0.3)).toFixed(0)}`,
+                lastVisit: ['hace 1 día','hace 2 días','hace 3 días','hace 4 días','hace 1 semana','hace 5 días'][i],
+                score: prof.propensity - i * 2,
+            }));
+            return { ...prof, name: storeSeg ? storeSeg.name : prof.id, clientCount, avgBasket, members };
+        });
+    }
+
     function renderStep2() {
         const p = aiState.selectedProduct;
+        selectedSegmentTypes = new Set();
         document.getElementById('targeting-product-name').textContent = `Targeting para: ${p.name} — ${p.category} · ${Math.round(Math.max(0, p.stock - p.forecastedDemand))} unidades en exceso`;
 
         // Behavior Analysis
@@ -1226,26 +1437,139 @@
             </div>`;
         }).join('') + `<div style="font-size:0.75rem; color:var(--text-2); margin-top:0.5rem;">Propensity Score = RFM + Historial de Categoría + Afinidad Estacional</div>`;
 
-        // Target Customers
-        const targetCustomers = [
-            { name: 'Segmento A Premium', count: 312, score: 91, rfm: 'Alta', freq: '3.2x/mes', emoji: '👔' },
-            { name: 'Compradores Habituales', count: 487, score: 83, rfm: 'Media-Alta', freq: '2.8x/mes', emoji: '🛒' },
-            { name: 'Compradores Esporádicos', count: 241, score: 71, rfm: 'Media', freq: '1.4x/mes', emoji: '👤' },
-            { name: `${segs[0].name}`, count: Math.floor(segs[0].clients * 0.4), score: 78, rfm: 'Alta', freq: `${segs[0].details.freq}x/mes`, emoji: '⭐' },
-        ];
-        document.getElementById('target-customers').innerHTML = targetCustomers.map(c => `
-            <div class="customer-target-card selected" onclick="this.classList.toggle('selected')">
-                <div class="customer-avatar" style="background:var(--red-light);">${c.emoji}</div>
-                <div style="flex:1;">
-                    <div style="font-weight:600; font-size:0.875rem;">${c.name}</div>
-                    <div style="font-size:0.75rem; color:var(--text-2);">${c.count.toLocaleString('es-AR')} clientes · RFM: ${c.rfm} · ${c.freq}</div>
-                    <div class="confidence-bar-wrap" style="margin-top:0.375rem;"><div class="confidence-bar" style="width:${c.score}%; background:var(--blue);"></div></div>
+        // Build & render segment type cards
+        const segTypes = buildSegmentTypes(currentStoreData);
+        aiState._segTypes = segTypes;
+
+        document.getElementById('target-customers').innerHTML = segTypes.map((seg, si) => `
+            <div class="segment-type-card" id="segcard-${si}">
+                <div class="seg-header" onclick="toggleSegmentType(${si})">
+                    <div class="seg-icon" style="background:${seg.iconBg};">${seg.icon}</div>
+                    <div style="flex:1; min-width:0;">
+                        <div style="display:flex; align-items:center; gap:0.625rem; margin-bottom:0.2rem; flex-wrap:wrap;">
+                            <span style="font-weight:700; font-size:0.95rem;">${seg.name}</span>
+                            <span class="badge" style="background:${seg.rfmBg}; color:${seg.rfmColor}; font-size:0.65rem;">RFM ${seg.rfm}</span>
+                            <span class="badge badge-info" style="font-size:0.65rem;">Propensity ${seg.propensity}%</span>
+                        </div>
+                        <div style="font-size:0.78rem; color:var(--text-2); line-height:1.45;">${seg.description}</div>
+                        <div class="seg-stat-row">
+                            <div class="seg-stat">
+                                <div class="seg-stat-val" style="color:var(--blue);">${seg.clientCount.toLocaleString('es-AR')}</div>
+                                <div class="seg-stat-lbl">clientes</div>
+                            </div>
+                            <div class="seg-stat">
+                                <div class="seg-stat-val">$${seg.avgBasket.toFixed(0)}</div>
+                                <div class="seg-stat-lbl">ticket prom.</div>
+                            </div>
+                            <div class="seg-stat">
+                                <div class="seg-stat-val">${seg.bestDiscount}</div>
+                                <div class="seg-stat-lbl">descuento ideal</div>
+                            </div>
+                            <div class="seg-stat">
+                                <div class="seg-stat-val">${seg.freqDesc}</div>
+                                <div class="seg-stat-lbl">frecuencia</div>
+                            </div>
+                            <div class="seg-stat">
+                                <div class="seg-stat-val" style="font-size:0.8rem; font-family:inherit;">${seg.channel}</div>
+                                <div class="seg-stat-lbl">canal óptimo</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="display:flex; flex-direction:column; align-items:center; flex-shrink:0; gap:0.5rem;">
+                        <input type="checkbox" class="include-checkbox" id="seg-check-${si}" onchange="onSegCheckChange(${si})" onclick="event.stopPropagation()">
+                        <div style="font-size:0.65rem; color:var(--text-2); text-align:center;">Incluir en<br>campaña</div>
+                    </div>
                 </div>
-                <div>
-                    <div class="customer-match-score" style="color:var(--blue);">${c.score}%</div>
-                    <div style="font-size:0.65rem; color:var(--text-2); text-align:right;">match</div>
+                <div class="seg-body">
+                    <button class="toggle-members-btn" id="toggle-btn-${si}" onclick="toggleMemberList(${si})">
+                        👤 Ver muestra de clientes (${seg.members.length} de ${seg.clientCount.toLocaleString('es-AR')}) ▾
+                    </button>
+                    <div class="seg-members-list" id="members-list-${si}">
+                        <div style="display:grid; grid-template-columns:1fr 1fr 1fr auto auto; align-items:center; padding:0.35rem 0.875rem; background:#f0f4ff; font-size:0.68rem; font-weight:700; text-transform:uppercase; letter-spacing:0.4px; color:var(--text-2); border-bottom:1px solid var(--border);">
+                            <span>Cliente</span><span>ID</span><span>Últ. visita</span><span>Ticket</span><span>Match</span>
+                        </div>
+                        ${seg.members.map(m => `
+                        <div class="seg-member-row">
+                            <span style="font-weight:600;">${m.name}</span>
+                            <span style="color:var(--text-2); font-family:var(--mono); font-size:0.72rem;">${m.id}</span>
+                            <span style="color:var(--text-2);">${m.lastVisit}</span>
+                            <span style="font-family:var(--mono); font-weight:600;">${m.basket}</span>
+                            <span class="badge badge-info" style="font-size:0.65rem;">${m.score}%</span>
+                        </div>`).join('')}
+                        <div style="padding:0.5rem 0.875rem; font-size:0.72rem; color:var(--text-2); font-style:italic; border-top:1px solid var(--border);">
+                            + ${(seg.clientCount - seg.members.length).toLocaleString('es-AR')} clientes más en este segmento
+                        </div>
+                    </div>
                 </div>
-            </div>`).join('');
+            </div>
+        `).join('');
+
+        document.getElementById('campaign-builder-panel').style.display = 'none';
+        document.getElementById('step2-continue-hint').style.display = 'block';
+        updateCampaignBuilder();
+    }
+
+    function toggleSegmentType(idx) {
+        const check = document.getElementById(`seg-check-${idx}`);
+        check.checked = !check.checked;
+        onSegCheckChange(idx);
+    }
+
+    function onSegCheckChange(idx) {
+        const check = document.getElementById(`seg-check-${idx}`);
+        const card = document.getElementById(`segcard-${idx}`);
+        if (check.checked) {
+            selectedSegmentTypes.add(idx);
+            card.classList.add('seg-selected');
+        } else {
+            selectedSegmentTypes.delete(idx);
+            card.classList.remove('seg-selected');
+        }
+        updateCampaignBuilder();
+    }
+
+    function toggleMemberList(idx) {
+        const list = document.getElementById(`members-list-${idx}`);
+        const btn  = document.getElementById(`toggle-btn-${idx}`);
+        const seg  = aiState._segTypes[idx];
+        const open = list.classList.toggle('open');
+        btn.innerHTML = `👤 ${open ? 'Ocultar' : 'Ver'} muestra de clientes (${seg.members.length} de ${seg.clientCount.toLocaleString('es-AR')}) ${open ? '▴' : '▾'}`;
+    }
+
+    function updateCampaignBuilder() {
+        const builder = document.getElementById('campaign-builder-panel');
+        const hint = document.getElementById('step2-continue-hint');
+        if (selectedSegmentTypes.size === 0) {
+            builder.style.display = 'none';
+            hint.style.display = 'block';
+            return;
+        }
+        builder.style.display = 'block';
+        hint.style.display = 'none';
+
+        const segs = aiState._segTypes;
+        const totalClients = [...selectedSegmentTypes].reduce((sum, idx) => sum + segs[idx].clientCount, 0);
+        const segNames = [...selectedSegmentTypes].map(idx => segs[idx].name).join(', ');
+
+        document.getElementById('campaign-total-badge').textContent = `${totalClients.toLocaleString('es-AR')} clientes`;
+        document.getElementById('campaign-summary-line').textContent = `Campaña dirigida a: ${segNames}`;
+
+        const p = aiState.selectedProduct;
+        const excessUnits = Math.max(0, p.stock - p.forecastedDemand);
+        document.getElementById('campaign-message').value =
+            `¡Hola [nombre]! Tenemos ${p.name} fresco a precio especial por las próximas 24hs. Solo para vos: hasta 30% OFF. ¡Aprovechá antes que se agote! 🛒`;
+    }
+
+    function toggleChannel(el, ch) {
+        el.classList.toggle('ch-selected');
+    }
+
+    function previewCampaign() {
+        const msg = document.getElementById('campaign-message').value || 'Sin mensaje configurado';
+        const segs = aiState._segTypes;
+        const totalClients = [...selectedSegmentTypes].reduce((sum, idx) => sum + segs[idx].clientCount, 0);
+        showConfirmationModal('👁', 'Preview de Campaña',
+            `<strong>Alcance:</strong> ${totalClients.toLocaleString('es-AR')} clientes<br><br><strong>Mensaje:</strong><br><em>"${msg}"</em><br><br><strong>Canales activos:</strong> Email, Push Notif., In-store`);
     }
 
     // ── STEP 3: Discount Strategies ──
@@ -1406,6 +1730,11 @@
     }
 
     function goToStep(step) {
+        // Validate: must select at least one segment type before going to step 3
+        if (step === 3 && aiState.step === 2 && selectedSegmentTypes.size === 0) {
+            showConfirmationModal('⚠️', 'Seleccioná un segmento', 'Debés incluir al menos un tipo de cliente en la campaña antes de continuar.');
+            return;
+        }
         aiState.step = step;
         updatePipelineUI();
         if (step === 2) renderStep2();
@@ -1417,7 +1746,11 @@
     function launchCampaign() {
         const p = aiState.selectedProduct;
         const s = aiState.selectedStrategy;
-        showConfirmationModal('🚀', 'Campaña Lanzada', `Campaña "${s.name}" activada para ${p.name} en ${currentStoreData.config.name}. ${s.unitsSold} clientes serán notificados vía ${s.channel}. El sistema monitoreará conversiones en tiempo real.`);
+        const segs = aiState._segTypes || [];
+        const totalClients = [...selectedSegmentTypes].reduce((sum, idx) => sum + (segs[idx] ? segs[idx].clientCount : 0), 0);
+        const segNames = [...selectedSegmentTypes].map(idx => segs[idx] ? segs[idx].name : '').filter(Boolean).join(', ');
+        const clientLine = totalClients > 0 ? `${totalClients.toLocaleString('es-AR')} clientes de los segmentos: ${segNames}` : `clientes seleccionados`;
+        showConfirmationModal('🚀', 'Campaña Lanzada', `Campaña "${s.name}" activada para <strong>${p.name}</strong> en ${currentStoreData.config.name}.<br><br>📣 Alcance: ${clientLine}<br>📡 Canal: ${s.channel}<br><br>El sistema monitoreará conversiones en tiempo real.`);
     }
     function exportReport() {
         showConfirmationModal('📄', 'Informe Exportado', `Informe de análisis IA exportado como PDF. Incluye predicción ML, targeting de clientes, comparativa de estrategias y proyección cash/cash para ${currentStoreData.config.name}.`);
